@@ -1,0 +1,1 @@
+<tal:comment tal:replace="nothing"> Intentionally left blank to avoid 404 request error </tal:comment>

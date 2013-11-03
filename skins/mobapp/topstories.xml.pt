@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<metal:page metal:use-macro="context/rss_main/macros/rss_master"
+ xmlns:metal="http://xml.zope.org/namespaces/metal"
+ xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<items metal:fill-slot="items" tal:omit-tag=""
+       tal:define="info context/@@topstoriesinfo;
+                   items info/items;
+                   site items/site;
+                   articles items/articles">
+  <item tal:repeat="article articles">
+    <metal:article metal:use-macro="context/rss_macros/macros/article"/>
+  </item>
+</items>
+</metal:page>

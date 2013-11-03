@@ -1,0 +1,77 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:mail="http://namespaces.zope.org/mail"
+           xmlns:i18n="http://namespaces.zope.org/i18n"
+           xmlns:cmf="http://namespaces.zope.org/cmf"
+           >
+
+    <cmf:registerDirectory name="mobapp"/>
+
+
+    <browser:page
+        for="Products.rfasite.interfaces.ISubsite"
+        name="zoneinfo"
+        class=".browser.MobappZoneView"
+        permission="zope.Public"
+        allowed_attributes=""
+    />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="articleinfo"
+       class=".browser.MobappArticlesView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="audioinfo"
+       class=".browser.MobappAudioArchiveView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="breakingnewsinfo"
+       class=".browser.MobappBreakingNewsView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="mediainfo"
+       class=".browser.MobappMediaView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="schedulerinfo"
+       class=".browser.MobappSchedulerView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="searchinfo"
+       class=".browser.MobappSearchView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="topstoriesinfo"
+       class=".browser.MobappTopStoriesView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+
+
+</configure>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<metal:page define-macro="rss_master"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal">
+<rss version="2.0"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
+  xmlns:rss="http://purl.org/rss/1.0/"
+  xmlns="http://purl.org/rss/1.0/">
+    <channel>
+        <title>untitled</title>
+        <rss:link>#</rss:link>
+        <description/>
+        <language>en-US</language>
+        <copyright>RFA 2012</copyright>
+        <lastBuildDate metal:define-slot="builddate">
+            <span tal:replace="python: DateTime()">now</span>
+        </lastBuildDate>
+        <items metal:define-slot="items" tal:omit-tag="">
+        </items>
+    </channel>
+</rss>
+</metal:page>
+

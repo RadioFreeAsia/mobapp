@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<metal:page
+   xmlns:metal="http://xml.zope.org/namespaces/metal"
+   xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+  <metal:macro metal:define-macro="article"
+               tal:define="article article"
+               >
+    <article tal:attributes="id article/id;
+                             site site;
+                             zone article/zone;
+                             pubDate article/pubDate;
+                             lastUpdated article/pubDate;
+                             url article/url;
+                             twitter article/twitter">
+      <image tal:condition="article/image"
+             tal:define="image article/image"
+             tal:attributes="type image/type;
+                             url image/url;
+                             id image/id;">
+        <imageTitle tal:content="image/title">Image Title</imageTitle>
+      </image>
+      <tal:x tal:condition="items/showTitle"
+             tal:define="title article/title">
+        <title tal:condition="items/CDATA_Title"
+               tal:content="structure python: '&lt;![CDATA[' + title + ']]&gt;'">CDATA Article Title</title>
+
+        <title tal:condition="not: items/CDATA_Title"
+               tal:content="title">Article Title</title>
+      </tal:x>
+      <tal:x tal:condition="items/showContent"
+             tal:define="content article/content">
+        <content tal:condition="items/CDATA_Content"
+                 tal:content="structure python: '&lt;![CDATA[' + content + ']]&gt;'">CDATA Article Content</content>
+        <content tal:condition="not: items/CDATA_Content"
+                 tal:content="content">Article Content</content>
+      </tal:x>
+      <metal:authorslot define-slot="authors">
+        <tal:comment tal:replace="nothing"> to re-enable authors, use tal:condition="items/showAuthors" </tal:comment>
+        <authors tal:condition="article/authors"
+                 tal:repeat="author article/authors">
+          <author tal:condition="python:any([author['first'], author['middle'], author['last']])"
+                  tal:attributes="id author/id">
+            <name tal:attributes="first author/first;
+                                  middle author/middle;
+                                  last python:author['last'] or None"/>
+            <email tal:condition="author/email"
+                   tal:content="author/email">email</email>
+            <description tal:condition="author/description"
+                         tal:content="author/description">description of author</description>
+          </author>
+        </authors>
+      </metal:authorslot>
+      <metal:audioslot define-slot="audio">
+        <audio tal:condition="article/audio"
+               tal:define="audio article/audio"
+               tal:attributes="id audio/id;
+                               duration audio/duration;
+                               mime audio/mime;
+                               url audio/url;
+                               date audio/date">
+          <audioTitle tal:content="audio/title">AudioTitle</audioTitle>
+          <audioDescription tal:content="audio/description">AudioDescription</audioDescription>
+        </audio>
+      </metal:audioslot>
+      <metal:videoslot define-slot="video">
+        <video tal:condition="article/video"
+               tal:define="video article/video"
+               tal:attributes="id video/id;
+                               width video/width;
+                               height video/height;
+                               duration video/duration;
+                               url video/url;
+                               thumbnail video/thumb;">
+          <videoTitle tal:content="video/title">Video Title</videoTitle>
+          <videoDescription tal:content="video/description">Video Description</videoDescription>
+          <guid tal:content="video/guid">video Guid</guid>
+        </video>
+      </metal:videoslot>
+    </article>
+  </metal:macro>
+
+
+
+  <metal:macro metal:define-macro="program"
+               tal:define="program program"
+               xmlns:metal="http://xml.zope.org/namespaces/metal"
+               xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+    <program tal:attributes="id program/id;
+                             duration program/duration;
+                             url program/url;
+                             date program/date;
+                             datelocal program/datelocal;
+                             ">
+      <programTitle tal:content="program/title"></programTitle>
+      <programDescription tal:content="program/description"></programDescription>
+    </program>
+
+  </metal:macro>
+
+</metal:page>

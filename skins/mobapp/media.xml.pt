@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<metal:page metal:use-macro="context/rss_main/macros/rss_master"
+ xmlns:metal="http://xml.zope.org/namespaces/metal"
+ xmlns:tal="http://xml.zope.org/namespaces/tal">
+
+<items metal:fill-slot="items" tal:omit-tag=""
+       tal:define="info context/@@mediainfo;
+                   items info/items;
+                   site items/site;
+                   articles items/articles">
+  <item tal:repeat="article articles">
+    <article tal:attributes="id article/id;
+                            site site;
+                            zone article/zone;
+                            pubDate article/pubDate;
+                            url article/url;
+                            twitter article/twitter | none;"
+             tal:define="video article/video;
+                         photogallery article/photogallery">
+      <tal:x tal:condition="items/showTitle"
+             tal:define="title article/title">
+      <title tal:condition="items/CDATA_Title"
+             tal:content="structure python: '&lt;![CDATA[' + title + ']]&gt;'">CDATA Article Title</title>
+       
+      <title tal:condition="not: items/CDATA_Title"
+             tal:content="title">Article Title</title>
+      </tal:x>
+      <tal:x tal:condition="items/showContent"
+             tal:define="content article/content">
+      <content tal:condition="items/CDATA_Content"
+               tal:content="structure python: '&lt;![CDATA[' + content + ']]&gt;'">CDATA Article Content</content>
+      <content tal:condition="not: items/CDATA_Content"
+               tal:content="content">Article Content</content>
+      </tal:x>
+
+      <video tal:condition="video">
+      </video>
+      <photogallery tal:condition="photogallery"
+                    tal:attributes="id photogallery/id">
+        <photogalleryTitle tal:content="photogallery/title"></photogalleryTitle>          
+        <photo tal:repeat="photo photogallery/photos"
+               tal:attributes="id photo/id;
+                               order photo/order;
+                               url photo/url">
+          <photoTitle tal:content="photo/title"></photoTitle>
+          <photoDescription tal:content="photo/description"></photoDescription> 
+        </photo>
+      </photogallery>
+    </article>
+
+  </item>
+
+</items>
+</metal:page>
+
