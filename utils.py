@@ -1,4 +1,4 @@
-import re
+import urlparse
 from kss.core.BeautifulSoup import BeautifulSoup, Tag
 
 def getFolderModificationDate(folderBrain, catalog):
@@ -39,29 +39,45 @@ def cleanHtml(content):
 def replaceEmbedsWithIframes(soup):
     """Find occurences of (youtube) embedded videos using 'object/embed' and replace it with an iframe"""
 
+    #take this:
+    #<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+    #        codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"
+    #        height="360" width="640">
+    #  <param name="allowFullScreen" value="true" />
+    #  <param name="allowscriptaccess" value="always" />
+    #  <param name="src" value="https://www.youtube.com/v/kc658mQqoU0" />
+    #  <param name="allowfullscreen" value="true" />
+    #  <embed height="360" width="640" src="https://www.youtube.com/v/kc658mQqoU0" allowscriptaccess="always" allowfullscreen="true" type="application/x-shockwave-flash">
+    #  </embed>
+    #</object>
+
+
+    #and turn it into this:
+    #<iframe src="//www.youtube.com/embed/kc658mQqoU0" allowfullscreen="" frameborder="0" width="500" height="345">
+    #</iframe>
+
     objectTags = soup.findAll(lambda tag: tag.name.lower() == 'object')
 
 
     for oTag in objectTags:
         paramSrcTag = oTag.find('param', attrs={'name': 'src',
                                                 'value': lambda s: s.find('youtube') != -1 })
-
         if paramSrcTag:
-            #<iframe allowfullscreen=""
-            #        frameborder="0"
-            #        src="//www.youtube.com/embed/8HIPGPml-BY" width="500" height="345">
-            #</iframe>
+            url = paramSrcTag['value']
+            parsed = urlparse.urlparse(url)
+            v_val = parsed.path.split('/')[2]   #find the youtube 'v' id
+            path = "/embed/"+v_val
 
-            src = paramSrcTag['value']
-            src.replace('https', 'http')
+            newUrl = urlparse.urlunparse(('',parsed.netloc, path,
+                                          '','',''))
 
-            iframeTag = Tag(soup, 'iframe', attrs=[(u'src',src),
+            iframeTag = Tag(soup, 'iframe', attrs=[(u'src',newUrl),
                                                    (u'allowfullscreen', u""),
                                                    (u'frameborder', u"0"),
-                                                   (u'width',u"500"),
-                                                   (u"height",u'345')
+                                                   (u'width',u"420"),
                                                    ]
                             )
+
             oTag.replaceWith(iframeTag)
 
     return soup
