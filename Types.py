@@ -222,7 +222,6 @@ class PhotoGallery(object):
             self.addSlideshow(obj)
         elif IImage.providedBy(obj):
             self.addImage(obj)
-
         else:
             for image in obj:
                 if IImage.providedBy(image):
@@ -238,8 +237,13 @@ class PhotoGallery(object):
     def __len__(self):
         return len(self._images)
 
-    #def __iter__(self):
-    #   pass
+    def __iter__(self):
+        #thread safe? you wish!
+        i=0
+        while i < len(self._images):
+            yield self.images[i]
+            i+=1
+        raise StopIteration
 
     def photos(self):
         return self._images
@@ -251,6 +255,11 @@ class PhotoGallery(object):
 
     def addSlideshow(self, slideshow):
         for image in slideshow.values():
+            self.addImage(image)
+
+    def mergeGallery(self, gallery):
+        """provided another PhotoGallery type, merge it into this one"""
+        for image in gallery:
             self.addImage(image)
 
     def setId(self, g_id):

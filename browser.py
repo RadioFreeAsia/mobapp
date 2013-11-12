@@ -317,27 +317,22 @@ class MobappMediaView(MobappBaseView):
         if "P" in self.Media:
             self.Photos = True
 
-    def add_slideshow(self, slideshow):
+    def add_gallery(self, gallery):
 
-        def make_article(slideshow):
-            photoGallery = Types.PhotoGallery()
-            photoGallery.addSlideshow(slideshow)
+        def make_article(gallery):
             article = slideshow._article_parent()
-            article.photogallery = photoGallery
+            article.photogallery = gallery
             return article
 
         dest_article = None
         for article in self.info["articles"]:
-            if article.id() == slideshow._article_parent_id():
+            if article.id() == gallery._article_parent_id():
                 dest_article = article
                 break
             if dest_article is None:
-                self.info["articles"].append(make_article(slideshow))
+                self.info["articles"].append(make_article(gallery))
             else:
-                dest_article.photogallery.addSlideshow(slideshow)
-
-
-
+                dest_article.photogallery.mergeGallery(gallery)
 
     def add_image(self, image):
 
@@ -422,7 +417,8 @@ class MobappMediaView(MobappBaseView):
                 image = Types.Image(brain.getObject())
                 self.add_image(image)
             elif brain.portal_type == "Slideshow":
-                self.add_slideshow(brain)
+                photoGallery = Types.PhotoGallery(brain.getObject())
+                self.add_gallery(photoGallery)
             elif brain.portal_type == "Video":
                 pass #Future
 
