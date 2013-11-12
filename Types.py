@@ -15,6 +15,7 @@ from Products.CMFCore.utils import getToolByName
 from AccessControl import allow_class
 
 from Products.rfasite.interfaces import IAllowed
+from Products.rfasite.interfaces import IImage, ISlideshow
 
 import utils
 
@@ -193,7 +194,6 @@ class Image(object):
         if self._parent is not None:
             return self._parent
 
-
         #There MUST be a better way to do this...
         obj = self.obj
         while obj is not None \
@@ -211,14 +211,26 @@ class Image(object):
         return self._article_parent().id()
 
 class PhotoGallery(object):
-    def __init__(self, images=[], g_id="NaN", title=""):
+    def __init__(self, obj=[], g_id="NaN", title=""):
         self.count = 0
         self._images = list()
-        for image in images:
-            self.addImage(image)
+        if ISlideshow.providedBy(obj):
+            if g_id=="NaN":
+                g_id = obj.UID()
+            if title=="":
+                title = obj.Title()
+            self.addSlideshow(obj)
+        elif IImage.providedBy(obj):
+            self.addImage(obj)
+
+        else:
+            for image in obj:
+                if IImage.providedBy(image):
+                    self.addImage(image)
 
         self.id = g_id
         self.title=title
+        self.obj = obj
 
     def __getitem__(self, index):
         return self._images[index]
@@ -237,8 +249,35 @@ class PhotoGallery(object):
         self._images.append(image)
         self.count += 1
 
+    def addSlideshow(self, slideshow):
+        for image in slideshow.values():
+            self.addImage(image)
+
     def setId(self, g_id):
         self.id = g_id
+
+    def _article_parent(self):
+        """Returns None if PhotoGallery has no parent that's a Story
+           Otherwise, return the story this slideshow is contained within
+        """
+        if self._parent is not None:
+            return self._parent
+
+        #There MUST be a better way to do this...
+        obj = self.obj
+        while obj is not None \
+                  and getattr(obj, 'portal_type', None) is not None \
+                  and obj.portal_type != "Story":
+
+            obj = aq_parent(aq_inner(obj))
+
+        if  getattr(obj, 'portal_type', None) is None:
+            return Placeholder_Article()
+        else:
+            return _Article(obj)
+
+    def _article_parent_id(self):
+        return self._article_parent().id()
 
 class _Article(Placeholder_Article):
 
