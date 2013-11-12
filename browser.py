@@ -422,7 +422,7 @@ class MobappMediaView(MobappBaseView):
                 image = Types.Image(brain.getObject())
                 self.add_image(image)
             elif brain.portal_type == "Slideshow":
-                self.add_slideshow(slideshow)
+                self.add_slideshow(brain)
             elif brain.portal_type == "Video":
                 pass #Future
 
