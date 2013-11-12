@@ -297,7 +297,8 @@ class MobappBreakingNewsView(MobappBaseView):
         return self.info
 
 class MobappMediaView(MobappBaseView):
-    #Total Crap.  Sorry.  Whole 'parent article' thing got out of hand.
+    """Present videos and slideshows as a selection of media
+    """
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
         self.Media = self.request.get("Media", "").upper()
@@ -349,50 +350,82 @@ class MobappMediaView(MobappBaseView):
     def items(self):
         super(MobappMediaView, self).items()
 
+        portal_types = [] #types we will be searching for.
+
         self.info["articles"] = []
 
+        if self.MediaID: #provided an id: return just that object
+            obj =  self.subsite.reference_catalog.lookupObject(self.MediaID)
+            if not obj:
+                return self.info #empty reply
+            else:
+                if obj.portal_type == "Slideshow":
+                    #XXX TODO:
+                    slideShow = Types.PhotoGallery(g_id=obj.UID(), title=obj.Title())
+                    #and add it to the reply somehow.
+                elif obj.portal_type == "Image":
+                    image = Types.Image(imgObj)
+                    self.add_image(image)
+                elif obj.portal_type == "Video":
+                    #XXX TODO
+                    pass
+
+                return self.info
+
+
+        #searching the catalog for media
         query ={}
-        query["portal_type"] = []
+
+        import pdb; pdb.set_trace()
 
         if self.Photos:
-            query["portal_type"].append("Image")
-        #if self.Videos:
-        #    query["portal_type"].append("Video")  #Future
+            portal_types.append("Image")
+            portal_types.append("Slideshow")
+        if self.Videos:
+            portal_types.append("Video")  #Future
 
-
+        #Get all "published" media types.
         query['review_state'] = "published"
         end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
         start = datetime.datetime.utcnow() - datetime.timedelta(days=self.DayCount)
-
-        date_range_query = {'query':(start,end), 'range':'min:max'}
-        query['effective'] = date_range_query
-
-        if self.MediaID:
-            imgObj =  self.subsite.reference_catalog.lookupObject(self.MediaID)
-            if imgObj:
-                if imgObj.portal_type not in ("Image", "Video"):
-                    return self.info #empty reply
-                image = Types.Image(imgObj)
-                self.add_image(image)
-                return self.info
-
+        query['effective'] = {'query':(start,end), 'range':'min:max'}
+        query['portal_type'] = portal_types
 
         if self.ZoneIDs:
             sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
             zonePaths = [brain.getPath() for brain in sectionBrains]
             query['path'] = {'query':zonePaths, 'depth':2}
 
-            brains = self.catalog.searchResults(query_request=query,
-                                                sort_index = 'effective',
-                                                reverse = 1,
-                                                sort_limit=self.Count)[:self.Count]
+        brains = self.catalog.search(query_request=query,
+                                     sort_index = 'effective',
+                                     reverse = 1,
+                                     limit=self.Count)[:self.Count]
 
-            for brain in brains:
-                #if brain.portal_type == "Video":   #Future
-                if brain.portal_type == "Image":
-                    image = Types.Image(brain.getObject())
-                    self.add_image(image)
+        #Get all published articles that contain unpublished (non-private) media:
+        query['portal_type'] = "Story"
+        articleBrains = self.catalog.search(query_request=query,
+                                            sort_index = 'effective',
+                                            reverse = 1,
+                                            limit=self.Count)
 
+        articlePaths = [brain.getPath() for brain in articleBrains]
+        brains += self.catalog.search(query_request={'portal_type': portal_types,
+                                                     'path': articlePaths },
+                                      limit=self.Count)[:self.Count]
+
+        #filter out those explicitly marked private:
+        brains = [b for b in brains if b.review_state != 'private']
+
+        #re-sort TODO
+
+        for brain in brains:
+            #if brain.portal_type == "Video":   #Future
+            if brain.portal_type == "Image":
+                image = Types.Image(brain.getObject())
+                self.add_image(image)
+            elif brain.portal_type == "Slideshow":
+                slideshow = Types.PhotoGallery(brain.getObject())
+                self.add_gallery(slideshow)
 
         return self.info
 
