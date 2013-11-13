@@ -258,7 +258,8 @@ class PhotoGallery(object):
         self.count += 1
 
     def addSlideshow(self, slideshow):
-        for image in slideshow.values():
+        for ATimage in slideshow.values():
+            image = Image(ATimage)
             self.addImage(image)
 
     def mergeGallery(self, gallery):
