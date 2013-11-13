@@ -203,9 +203,11 @@ class Image(object):
             obj = aq_parent(aq_inner(obj))
 
         if  getattr(obj, 'portal_type', None) is None:
-            return Placeholder_Article()
+            self._parent = Placeholder_Article()
         else:
-            return _Article(obj)
+            self._parent = _Article(obj)
+
+        return self._parent
 
     def _article_parent_id(self):
         return self._article_parent().id()
@@ -214,6 +216,8 @@ class PhotoGallery(object):
     def __init__(self, obj=[], g_id="NaN", title=""):
         self.count = 0
         self._images = list()
+        self._parent = None
+
         if ISlideshow.providedBy(obj):
             if g_id=="NaN":
                 g_id = obj.UID()
@@ -281,9 +285,10 @@ class PhotoGallery(object):
             obj = aq_parent(aq_inner(obj))
 
         if  getattr(obj, 'portal_type', None) is None:
-            return Placeholder_Article()
+            self._parent = Placeholder_Article()
         else:
-            return _Article(obj)
+            self._parent = _Article(obj)
+        return self._parent
 
     def _article_parent_id(self):
         return self._article_parent().id()
