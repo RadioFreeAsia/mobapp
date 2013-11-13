@@ -371,7 +371,7 @@ class MobappMediaView(MobappBaseView):
                 return self.info #empty reply
             else:
                 if obj.portal_type == "Slideshow":
-                    slideShow = Types.PhotoGallery(g_id=obj.UID(), title=obj.Title())
+                    slideShow = Types.PhotoGallery(obj)
                     self.add_slideshow(slideShow)
                 elif obj.portal_type == "Image":
                     image = Types.Image(imgObj)
@@ -409,7 +409,9 @@ class MobappMediaView(MobappBaseView):
 
         articlePaths = [brain.getPath() for brain in articleBrains]
         brains = self.catalog.search(query_request={'portal_type': media_types,
-                                                    'path': articlePaths },
+                                                    'path': {'query':articlePaths,
+                                                             'depth':1}
+                                                   },
                                      limit=self.Count)[:self.Count]
 
         for brain in brains:
