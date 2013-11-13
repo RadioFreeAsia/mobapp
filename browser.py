@@ -320,7 +320,7 @@ class MobappMediaView(MobappBaseView):
     def add_gallery(self, gallery):
 
         def make_article(gallery):
-            article = slideshow._article_parent()
+            article = gallery._article_parent()
             article.photogallery = gallery
             return article
 
