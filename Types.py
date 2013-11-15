@@ -245,7 +245,7 @@ class PhotoGallery(object):
         #thread safe? you wish!
         i=0
         while i < len(self._images):
-            yield self.images[i]
+            yield self._images[i]
             i+=1
         raise StopIteration
 
@@ -264,6 +264,9 @@ class PhotoGallery(object):
 
     def mergeGallery(self, gallery):
         """provided another PhotoGallery type, merge it into this one"""
+        if gallery is self:
+            raise AssertionError, "merging with yourself is not really a good idea.  If you really meant to do this, use copy()"
+
         for image in gallery:
             self.addImage(image)
 

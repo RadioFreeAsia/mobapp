@@ -317,48 +317,35 @@ class MobappMediaView(MobappBaseView):
         if "P" in self.Media:
             self.Photos = True
 
-    def add_gallery(self, gallery):
+    def add_media(self, media_obj):
 
-        def make_article(gallery):
-            article = gallery._article_parent()
-            article.photogallery = gallery
-            return article
+        def make_article(media_obj):
+            article = media_obj._article_parent()
+            if isinstance(media_obj, Types.Image):
+                #anonymous gallery ID's are hacked into existance this way.
+                photoGallery = Types.PhotoGallery()
+                photoGallery.setId("G"+article.id())
+                photoGallery.addImage(image)
+            elif isinstance(media_obj, Types.PhotoGallery):
+                photoGallery = media_obj
 
-        dest_article = None
-        for article in self.info["articles"]:
-            if article.id() == gallery._article_parent_id():
-                dest_article = article
-                break
-
-        if dest_article is None:
-            self.info["articles"].append(make_article(gallery))
-        else:
-            dest_article.photogallery.mergeGallery(gallery)
-
-
-    def add_image(self, image):
-
-        def make_article(image=None):
-            photoGallery = Types.PhotoGallery()
-            photoGallery.addImage(image)
-            article = image._article_parent()
-            #anonymous gallery ID's are hacked into existance this way.
-            photoGallery.setId("G"+article.id())
             article.photogallery = photoGallery
             return article
 
-
+        import pdb; pdb.set_trace()
         dest_article = None
         for article in self.info["articles"]:
-            if article.id() == image._article_parent_id():
+            if article.id() == media_obj._article_parent_id():
                 dest_article = article
                 break
 
         if dest_article is None:
-            self.info["articles"].append(make_article(image))
+            self.info["articles"].append(make_article(media_obj))
         else:
-            dest_article.photogallery.addImage(image)
-
+            if isinstance(media_obj, Types.Image):
+                dest_article.photogallery.addImage(media_obj)
+            elif isinstance(media_obj, Types.PhotoGallery):
+                dest_article.photogallery.mergeGallery(media_obj)
 
     def items(self):
         super(MobappMediaView, self).items()
@@ -373,12 +360,11 @@ class MobappMediaView(MobappBaseView):
                 return self.info #empty reply
             else:
                 if obj.portal_type == "Slideshow":
-                    slideShow = Types.PhotoGallery(obj)
-                    self.add_slideshow(slideShow)
+                    self.add_media(Types.PhotoGallery(obj))
                 elif obj.portal_type == "Image":
-                    image = Types.Image(imgObj)
-                    self.add_image(image)
-                elif obj.portal_type == "Video":
+                    self.add_media(Types.Image(imgObj))
+                elif obj.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
+                    #self.add_media(Types.Video(videoObj))
                     pass #future
 
                 return self.info
@@ -418,13 +404,12 @@ class MobappMediaView(MobappBaseView):
 
         for brain in brains:
             if brain.portal_type == "Image":
-                image = Types.Image(brain.getObject())
-                self.add_image(image)
+                self.add_media(Types.PhotoGallery(brain.getObject()))
             elif brain.portal_type == "Slideshow":
-                photoGallery = Types.PhotoGallery(brain.getObject())
-                self.add_gallery(photoGallery)
-            elif brain.portal_type == "Video":
-                pass #Future
+                self.add_media(Types.PhotoGallery(brain.getObject()))
+            elif brain.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
+                #self.add_media(Types.Video(videoObj))
+                pass #future
 
         return self.info
 
