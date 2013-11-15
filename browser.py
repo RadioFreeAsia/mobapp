@@ -329,10 +329,12 @@ class MobappMediaView(MobappBaseView):
             if article.id() == gallery._article_parent_id():
                 dest_article = article
                 break
-            if dest_article is None:
-                self.info["articles"].append(make_article(gallery))
-            else:
-                dest_article.photogallery.mergeGallery(gallery)
+
+        if dest_article is None:
+            self.info["articles"].append(make_article(gallery))
+        else:
+            dest_article.photogallery.mergeGallery(gallery)
+
 
     def add_image(self, image):
 
