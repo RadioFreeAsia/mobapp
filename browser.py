@@ -332,7 +332,6 @@ class MobappMediaView(MobappBaseView):
             article.photogallery = photoGallery
             return article
 
-        import pdb; pdb.set_trace()
         dest_article = None
         for article in self.info["articles"]:
             if article.id() == media_obj._article_parent_id():
