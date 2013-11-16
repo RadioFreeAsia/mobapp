@@ -325,7 +325,7 @@ class MobappMediaView(MobappBaseView):
                 #anonymous gallery ID's are hacked into existance this way.
                 photoGallery = Types.PhotoGallery()
                 photoGallery.setId("G"+article.id())
-                photoGallery.addImage(image)
+                photoGallery.addImage(media_obj)
             elif isinstance(media_obj, Types.PhotoGallery):
                 photoGallery = media_obj
 
