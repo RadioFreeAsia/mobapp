@@ -403,7 +403,7 @@ class MobappMediaView(MobappBaseView):
 
         for brain in brains:
             if brain.portal_type == "Image":
-                self.add_media(Types.PhotoGallery(brain.getObject()))
+                self.add_media(Types.Image(brain.getObject()))
             elif brain.portal_type == "Slideshow":
                 self.add_media(Types.PhotoGallery(brain.getObject()))
             elif brain.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
