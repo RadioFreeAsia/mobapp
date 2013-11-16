@@ -353,61 +353,57 @@ class MobappMediaView(MobappBaseView):
 
         self.info["articles"] = []
 
+        zope_objects = []
+
         if self.MediaID: #provided an id: return just that object
-            obj =  self.subsite.reference_catalog.lookupObject(self.MediaID)
-            if not obj:
-                return self.info #empty reply
-            else:
-                if obj.portal_type == "Slideshow":
-                    self.add_media(Types.PhotoGallery(obj))
-                elif obj.portal_type == "Image":
-                    self.add_media(Types.Image(imgObj))
-                elif obj.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
-                    #self.add_media(Types.Video(videoObj))
-                    pass #future
+            obj = self.subsite.reference_catalog.lookupObject(self.MediaID)
+            if obj:
+                zope_objects.append(obj)
 
-                return self.info
+        else: #we query the catalog
+            if self.Photos:
+                media_types.append("Image")
+                media_types.append("Slideshow")
+            if self.Videos:
+                media_types.append("Video")  #Future
 
-        if self.Photos:
-            media_types.append("Image")
-            media_types.append("Slideshow")
-        if self.Videos:
-            media_types.append("Video")  #Future
+            query ={}
+            query['portal_type'] = media_types
 
-        query ={}
-        query['portal_type'] = media_types
+            if self.ZoneIDs:
+                sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
+                zonePaths = [brain.getPath() for brain in sectionBrains]
+                query['path'] = {'query':zonePaths, 'depth':2}
 
-        if self.ZoneIDs:
-            sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
-            zonePaths = [brain.getPath() for brain in sectionBrains]
-            query['path'] = {'query':zonePaths, 'depth':2}
+            #Get all published articles that contain media:
+            query['portal_type'] = "Story"
+            query['review_state'] = "published"
+            end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
+            start = datetime.datetime.utcnow() - datetime.timedelta(days=self.DayCount)
+            query['effective'] = {'query':(start,end), 'range':'min:max'}
 
-        #Get all published articles that contain media:
-        query['portal_type'] = "Story"
-        query['review_state'] = "published"
-        end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
-        start = datetime.datetime.utcnow() - datetime.timedelta(days=self.DayCount)
-        query['effective'] = {'query':(start,end), 'range':'min:max'}
+            articleBrains = self.catalog.search(query_request=query,
+                                                sort_index = 'effective',
+                                                reverse = 1,
+                                                limit=self.Count)
 
-        articleBrains = self.catalog.search(query_request=query,
-                                            sort_index = 'effective',
-                                            reverse = 1,
-                                            limit=self.Count)
+            articlePaths = [brain.getPath() for brain in articleBrains]
+            brains = self.catalog.search(query_request={'portal_type': media_types,
+                                                        'path': {'query':articlePaths,
+                                                                 'depth':1}
+                                                       },
+                                         limit=self.Count)[:self.Count]
 
-        articlePaths = [brain.getPath() for brain in articleBrains]
-        brains = self.catalog.search(query_request={'portal_type': media_types,
-                                                    'path': {'query':articlePaths,
-                                                             'depth':1}
-                                                   },
-                                     limit=self.Count)[:self.Count]
 
-        for brain in brains:
-            if brain.portal_type == "Image":
-                self.add_media(Types.Image(brain.getObject()))
-            elif brain.portal_type == "Slideshow":
-                self.add_media(Types.PhotoGallery(brain.getObject()))
-            elif brain.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
-                #self.add_media(Types.Video(videoObj))
+            zope_objects = [brain.getObject() for brain in brains]
+
+        for obj in zope_objects:
+            if obj.portal_type == "Slideshow":
+                self.add_media(Types.PhotoGallery(obj))
+            elif obj.portal_type == "Image":
+                self.add_media(Types.Image(obj))
+            elif obj.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
+                #self.add_media(Types.Video(obj))
                 pass #future
 
         return self.info
