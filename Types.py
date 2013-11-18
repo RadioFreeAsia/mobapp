@@ -351,6 +351,9 @@ class _Article(Placeholder_Article):
         return None
         #return Video(self.obj.getVideoClip())
 
+    def gallery(self):
+        return None
+
     def image(self):
         imgObj = self.obj.getFeaturedImage()
         if imgObj is None:

@@ -77,6 +77,22 @@
           <guid tal:content="video/guid">video Guid</guid>
         </video>
       </metal:videoslot>
+      <metal:galleryslot define-slot="gallery">
+        <photogallery tal:condition="article/gallery"
+                      tal:define="gallery article/gallery"
+                      tal:attributes="id gallery/id;
+                                      relType string: 2">
+          <photogalleryTitle tal:content="gallery/title"> Gallery Title </photogalleryTitle>
+          <photogalleryDescription tal:content="gallery/description"> Gallery Description </photogalleryDescription>
+          <photo tal:repeat="photo photogallery/photos"
+                 tal:attributes="id photo/id;
+                                 order photo/order;
+                                 url photo/url">photos>
+            <photoTitle tal:content="photo/title"></photoTitle>
+            <photoDescription tal:content="photo/description"></photoDescription>
+          </photo>
+        </photogallery>
+      </metal:galleryslot>
     </article>
   </metal:macro>
 
