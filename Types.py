@@ -302,6 +302,7 @@ class _Article(Placeholder_Article):
     def __init__(self, obj, request=None):
         self.obj = obj
         self.request = request
+        self._gallery = None
 
     #oops, overridden built-in func 'id'.  beware.
     def id(self):
@@ -352,7 +353,25 @@ class _Article(Placeholder_Article):
         #return Video(self.obj.getVideoClip())
 
     def gallery(self):
-        return None
+        """return a single rfasite.slideshow as a PhotoGallery associated with the article"""
+
+        #slideshows are embedded via the Layout Tab, so we must journey into cp_container to find it.
+        cp = getattr(self.obj, 'cp_container', None)
+        if cp is None:
+            return None
+
+        if self._gallery is not None:
+            return self._gallery
+
+        slots = cp.filled_slots.values()
+        for slot in slots:
+            for elem in slot.values():
+                obj = elem.getTarget()
+                if ISlideshow.providedBy(obj):
+                    #be lazy.  The first gallery you find is all you get!
+                    self._gallery = PhotoGallery(obj)
+
+        return self._gallery
 
     def image(self):
         imgObj = self.obj.getFeaturedImage()

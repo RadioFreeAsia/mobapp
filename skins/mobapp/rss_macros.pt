@@ -79,12 +79,16 @@
       </metal:videoslot>
       <metal:galleryslot define-slot="gallery">
         <photogallery tal:condition="article/gallery"
-                      tal:define="gallery article/gallery"
+                      tal:define="gallery article/gallery;
+                                  g_title gallery/title | nothing;
+                                  g_desc gallery/description | nothing"
                       tal:attributes="id gallery/id;
                                       relType string: 2">
-          <photogalleryTitle tal:content="gallery/title"> Gallery Title </photogalleryTitle>
-          <photogalleryDescription tal:content="gallery/description"> Gallery Description </photogalleryDescription>
-          <photo tal:repeat="photo photogallery/photos"
+          <photogalleryTitle tal:condition="g_title"
+                             tal:content="g_title"> Gallery Title </photogalleryTitle>
+          <photogalleryDescription tal:condition="g_desc"
+                                   tal:content="g_desc"> Gallery Description </photogalleryDescription>
+          <photo tal:repeat="photo gallery/photos"
                  tal:attributes="id photo/id;
                                  order photo/order;
                                  url photo/url">photos>
