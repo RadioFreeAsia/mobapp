@@ -15,29 +15,6 @@ import utils
 
 SITEID = 0  #There is only one site, and it's rfa.org
 
-from Products.rfasite.utils import TOP_ZONES
-
-#These languages can just use what RetailNav returns.
-TOP_ZONES.pop('burmese', None)
-TOP_ZONES.pop('cantonese', None)
-#TOP_ZONES.pop('english', None)
-TOP_ZONES.pop('khmer', None)
-TOP_ZONES.pop('korean', None)
-TOP_ZONES.pop('lao', None)
-TOP_ZONES.pop('mandarin', None)
-TOP_ZONES.pop('tibetan', None)
-TOP_ZONES.pop('uyghur', None)
-TOP_ZONES.pop('vietnamese', None)
-
-#remove specific sections from english that don't have "articles"
-remove = ['news/special', 'video', 'bookshelf', 'multimedia']
-for r in remove:
-    try:
-        TOP_ZONES['english'].remove(r) #In Focus
-    except ValueError:
-        pass
-
-
 class MobappBaseView(BrowserView):
     #TODO: move query to base and populate with, at least, "published" state.
     def __init__(self, context, request):
@@ -162,6 +139,14 @@ class MobappZoneView(MobappBaseView):
 
         return zones
 
+    def getZonesFromSubsiteProperty(self):
+        zoneList = self.subsite.getProperty('mobapp_zones', None)
+        if zoneList:
+            return self.getZonesFromList(zoneList)
+        else:
+            return None
+
+
     def getZonesFromPath(self, parentZones):
         """Given a parent zone (section) return all child Sections
            Used for 'subzone' query, when zoneID parameter is provided
@@ -198,11 +183,8 @@ class MobappZoneView(MobappBaseView):
 
         if parentZone == self.subsite:
             #this is a query from the root:
-            zoneList = TOP_ZONES.get(self.subsite.id)
-            if zoneList is not None:
-                #we have manually configured zones for the mobile app.
-                zones = self.getZonesFromList(zoneList)
-            else:
+            zones = self.getZonesFromSubsiteProperty()
+            if zones is None:
                 #no configuration, use the subsite's default navigation setup.
                 zones = self.getZonesFromNav()
 
