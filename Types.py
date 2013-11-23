@@ -326,7 +326,8 @@ class _Article(Placeholder_Article):
         return self.obj.Title()
 
     def content(self):
-        return utils.cleanHtml(self.obj.text())
+        renderedText = self.obj.getText()
+        return utils.cleanHtml(renderedText)
 
     def audios(self):
         ###XXX IAllowed not working here
