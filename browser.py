@@ -93,9 +93,6 @@ class MobappBaseView(BrowserView):
                       "AuthorFullName": self.AuthorsFullName}
 
 
-
-
-
 class MobappZoneView(MobappBaseView):
     """zones.zml view"""
     def __init__(self, context, request):
@@ -109,13 +106,11 @@ class MobappZoneView(MobappBaseView):
         """Return dictionary of zones based on
            how the RetailNav returns
         """
-
         view = RetailNavigationView(self.context, self.request)
         navs = view.navigation()
         zones = self._makeZoneInfo([n['brain'] for n in navs])
 
         return zones
-
 
     def getZonesFromList(self, zoneList):
         """generates a dictionary of zones based on a configured list of paths relative to subsite
