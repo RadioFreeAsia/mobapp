@@ -379,10 +379,7 @@ class _Article(Placeholder_Article):
         if imgObj is None:
             return None
 
-        scales = getMultiAdapter((imgObj, self.request), name='images')
-        scaled = scales.scale('image', direction="down", width=400)
-
-        return Image(scaled)
+        return Image(self.obj.getFeaturedImage())
 
     def authors(self):
         """an author is a dictionary containing keys 'first', 'middle', 'last', 'email', 'id'
