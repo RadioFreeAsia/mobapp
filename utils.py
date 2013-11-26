@@ -27,14 +27,18 @@ def toBool(boolstring):
 
 def cleanHtml(content):
     soup = BeautifulSoup(content)
-    to_extract = soup.findAll(lambda tag: tag.name.lower() == 'script')
-    for item in to_extract:
-        item.extract()
 
+    soup = removeJavascript(soup)
     soup = replaceEmbedsWithIframes(soup)
+    soup = removeViewFromImages(soup)
 
     return unicode(soup)
 
+def removeJavascript(soup):
+    to_extract = soup.findAll(lambda tag: tag.name.lower() == 'script')
+    for item in to_extract:
+        item.extract()
+    return soup
 
 def replaceEmbedsWithIframes(soup):
     """Find occurences of (youtube) embedded videos using 'object/embed' and replace it with an iframe"""
@@ -81,6 +85,20 @@ def replaceEmbedsWithIframes(soup):
             oTag.replaceWith(iframeTag)
 
     return soup
+
+def removeViewFromImages(soup):
+    """Find occurances of images processed with 'resolve_uid' that have '/image' appended to the url
+       and remove that view, leaving the url to the image untouched"""
+
+    images = soup.findAll('img')
+
+    for image in images:
+        if image['src'].endswith("/image"):
+            image['src'] = image['src'][:-len("/image")]
+
+    return soup
+
+
 
 
 class CaseInsensitiveDict(dict):
