@@ -339,7 +339,6 @@ class MobappMediaView(MobappBaseView):
 
         else: #we query the catalog
             if self.Photos:
-                media_types.append("Image")
                 media_types.append("Slideshow")
             if self.Videos:
                 media_types.append("Video")  #Future
