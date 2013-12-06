@@ -161,9 +161,9 @@ class Media(object):
         raise NotImplementedError, "Can't instantiate abstract parent 'media'"
 
     @property
-    def _article_parent(self):
-        """Returns None if Media has no parent that's a Story
-           Otherwise, return the story this slideshow is contained within
+    def article_parent(self):
+        """Returns a Placeholder_Article if Media has no parent that's a Story
+           Otherwise, return the story this Media object is contained within
         """
         if self._parent is not None:
             return self._parent
@@ -182,9 +182,9 @@ class Media(object):
             self._parent = _Article(obj)
         return self._parent
 
-    def _article_parent_id(self):
-        return self._article_parent.id()
-
+    @property
+    def article_parent_id(self):
+        return self.article_parent.id()
 
 class Image(Media):
 
@@ -312,7 +312,7 @@ class Video(Media):
 
     def date(self):
         """Publication date"""
-        return self._article_parent.pubDate
+        return self.article_parent.pubDate
 
     def title(self):
         """Title of the video item"""

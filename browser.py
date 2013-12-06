@@ -302,12 +302,12 @@ class MobappMediaView(MobappBaseView):
         dest_article = None
         #search to see if we have this article already.
         for article in self.info["articles"]:
-            if article.id() == media_obj._article_parent_id():
+            if article.id() == media_obj.article_parent_id:
                 dest_article = article
                 break
 
         if dest_article is None:
-            dest_article = media_obj._article_parent()
+            dest_article = media_obj.article_parent
             self.info["articles"].append(dest_article)
 
         if isinstance(media_obj, Types.PhotoGallery):
