@@ -308,7 +308,7 @@ class Video(Media):
 
     def url(self):
         """Location of the video file"""
-        return self.obj.getRemoteURL()
+        return self.obj.getRemoteUrl()
 
     def date(self):
         """Publication date"""
