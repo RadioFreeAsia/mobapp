@@ -320,7 +320,7 @@ class Video(Media):
 
     def description(self):
         """Description for the video item"""
-        return self.obj.getDescription()
+        return self.obj.Description()
 
     def guid(self):
         return self.obj.UID()
