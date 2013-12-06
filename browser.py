@@ -307,7 +307,7 @@ class MobappMediaView(MobappBaseView):
                 break
 
         if dest_article is None:
-            dest_article = media_obj._article_parent_id()
+            dest_article = media_obj._article_parent()
             self.info["articles"].append(dest_article)
 
         if isinstance(media_obj, Types.PhotoGallery):
