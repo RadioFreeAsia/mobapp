@@ -277,7 +277,7 @@ class MobappMediaView(MobappBaseView):
     """Present videos and slideshows as a selection of media
     """
     photo_types = ["Slideshow",]
-    video_types = ["Video Link", "Youtube Link", "Kaltura Video"]
+    video_types = ["VideoLink", "YoutubeLink", "KalturaVideo"]
 
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
