@@ -276,6 +276,11 @@ class MobappBreakingNewsView(MobappBaseView):
 class MobappMediaView(MobappBaseView):
     """Present videos and slideshows as a selection of media
     """
+
+    photo_types = ["Slideshow",]
+    video_types = ["Video Link", "Youtube Link", "Kaltura Video"]
+
+
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
         self.Media = self.request.get("Media", "").upper()
@@ -297,16 +302,11 @@ class MobappMediaView(MobappBaseView):
     def add_media(self, media_obj):
 
         def make_article(media_obj):
-            article = media_obj._article_parent()
-            if isinstance(media_obj, Types.Image):
-                #anonymous gallery ID's are hacked into existance this way.
-                photoGallery = Types.PhotoGallery()
-                photoGallery.setId("G"+article.id())
-                photoGallery.addImage(media_obj)
-            elif isinstance(media_obj, Types.PhotoGallery):
-                photoGallery = media_obj
 
-            article.photogallery = photoGallery
+            if isinstance(media_obj, Types.PhotoGallery):
+                article.photogallery = media_obj
+            if isinstance(media_obj, Types.Video):
+                article.video = media_obj
             return article
 
         dest_article = None
@@ -316,6 +316,7 @@ class MobappMediaView(MobappBaseView):
                 break
 
         if dest_article is None:
+            dest_article = media_obj._article_parent()
             self.info["articles"].append(make_article(media_obj))
         else:
             if isinstance(media_obj, Types.Image):
@@ -339,9 +340,9 @@ class MobappMediaView(MobappBaseView):
 
         else: #we query the catalog
             if self.Photos:
-                media_types.append("Slideshow")
+                media_types += self.photo_types
             if self.Videos:
-                media_types.append("Video")  #Future
+                media_types += self.video_types
 
             query ={}
             query['portal_type'] = media_types
@@ -351,7 +352,8 @@ class MobappMediaView(MobappBaseView):
                 zonePaths = [brain.getPath() for brain in sectionBrains]
                 query['path'] = {'query':zonePaths, 'depth':2}
 
-            #Get all published articles that contain media:
+            #we search for published articles, and return media within those articles.
+            # This avoids requiring Slideshows and Videos to be 'published'
             query['portal_type'] = "Story"
             query['review_state'] = "published"
             end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
@@ -374,13 +376,10 @@ class MobappMediaView(MobappBaseView):
             zope_objects = [brain.getObject() for brain in brains]
 
         for obj in zope_objects:
-            if obj.portal_type == "Slideshow":
+            if obj.portal_type in self.photo_types:
                 self.add_media(Types.PhotoGallery(obj))
-            elif obj.portal_type == "Image":
-                self.add_media(Types.Image(obj))
-            elif obj.portal_type == "Video": #IVideo.providedBy(obj) is what this should say.
-                #self.add_media(Types.Video(obj))
-                pass #future
+            elif obj.portal_type in self.video_types: #IVideo.providedBy(obj) is what this should say.
+                self.add_media(Types.Video(obj))
 
         return self.info
 

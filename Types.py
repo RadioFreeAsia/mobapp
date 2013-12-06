@@ -153,12 +153,43 @@ class AudioClip(object):
         mt_tool = getToolByName(self.obj.getSubsite(), "mimetypes_registry")
         return mt_tool.lookupExtension(self.__filename())
 
-class Image(object):
+
+class Media(object):
+    _parent = None
+
+    def __init__(self):
+        raise NotImplementedError, "Can't instantiate abstract parent 'media'"
+
+    def _article_parent(self):
+        """Returns None if Media has no parent that's a Story
+           Otherwise, return the story this slideshow is contained within
+        """
+        if self._parent is not None:
+            return self._parent
+
+        #There MUST be a better way to do this...
+        obj = self.obj
+        while obj is not None \
+                  and getattr(obj, 'portal_type', None) is not None \
+                  and obj.portal_type != "Story":
+
+            obj = aq_parent(aq_inner(obj))
+
+        if  getattr(obj, 'portal_type', None) is None:
+            self._parent = Placeholder_Article()
+        else:
+            self._parent = _Article(obj)
+        return self._parent
+
+    def _article_parent_id(self):
+        return self._article_parent().id()
+
+
+class Image(Media):
 
     def __init__(self, imgObj, order=0):
         self.obj = imgObj
         self.order = None
-        self._parent = None
 
     def id(self):
         return self.obj.UID()
@@ -187,36 +218,12 @@ class Image(object):
     def description(self):
         return self.obj.CaptionOrTitle()
 
-    def _article_parent(self):
-        """Returns None if image has no parent that's a Story
-           Otherwise, return the story this image is contained within
-        """
-        if self._parent is not None:
-            return self._parent
-
-        #There MUST be a better way to do this...
-        obj = self.obj
-        while obj is not None \
-                  and getattr(obj, 'portal_type', None) is not None \
-                  and obj.portal_type != "Story":
-
-            obj = aq_parent(aq_inner(obj))
-
-        if  getattr(obj, 'portal_type', None) is None:
-            self._parent = Placeholder_Article()
-        else:
-            self._parent = _Article(obj)
-
-        return self._parent
-
-    def _article_parent_id(self):
-        return self._article_parent().id()
-
-class PhotoGallery(object):
+class PhotoGallery(Media):
     def __init__(self, obj=[], g_id="NaN", title=""):
-        self.count = 0
         self._images = list()
-        self._parent = None
+        self.id = g_id
+        self.title=title
+        self.obj = obj
 
         if ISlideshow.providedBy(obj):
             if g_id=="NaN":
@@ -231,20 +238,16 @@ class PhotoGallery(object):
                 if IImage.providedBy(image):
                     self.addImage(image)
 
-        self.id = g_id
-        self.title=title
-        self.obj = obj
-
     def __getitem__(self, index):
         return self._images[index]
 
     def __len__(self):
-        return len(self._images)
+        return self.count
 
     def __iter__(self):
         #thread safe? you wish!
         i=0
-        while i < len(self._images):
+        while i < self.count:
             yield self._images[i]
             i+=1
         raise StopIteration
@@ -255,7 +258,10 @@ class PhotoGallery(object):
     def addImage(self, image):
         image.order=self.count
         self._images.append(image)
-        self.count += 1
+
+    @property
+    def count(self):
+        return len(self._images)
 
     def addSlideshow(self, slideshow):
         for ATimage in slideshow.values():
@@ -273,29 +279,50 @@ class PhotoGallery(object):
     def setId(self, g_id):
         self.id = g_id
 
-    def _article_parent(self):
-        """Returns None if PhotoGallery has no parent that's a Story
-           Otherwise, return the story this slideshow is contained within
-        """
-        if self._parent is not None:
-            return self._parent
 
-        #There MUST be a better way to do this...
-        obj = self.obj
-        while obj is not None \
-                  and getattr(obj, 'portal_type', None) is not None \
-                  and obj.portal_type != "Story":
 
-            obj = aq_parent(aq_inner(obj))
+class Video(Media):
+    """Mobapp representation of a video"""
+    def __init__(self, obj):
+        self.obj = obj
 
-        if  getattr(obj, 'portal_type', None) is None:
-            self._parent = Placeholder_Article()
-        else:
-            self._parent = _Article(obj)
-        return self._parent
+    def id(self):
+        return self.guid()
 
-    def _article_parent_id(self):
-        return self._article_parent().id()
+    def relType(self):
+        """Defines relation between article and video => 0=SameItem, 1=MainImage,2=EmbededInContent"""
+        return 2 #XXX TODO
+
+    def duration(self):
+        """Duration of the video data (seconds)"""
+        return 0 #XXX TODO
+
+    def width(self):
+        """Width (pixels) of the video"""
+        return 176 #XXX TODO
+
+    def height(self):
+        """Height (pixels) of the video"""
+        return 144 #XXX TODO
+
+    def url(self):
+        """Location of the video file"""
+        return self.obj.getRemoteURL()
+
+    def date(self):
+        """Publication date"""
+        return self._article_parent.pubDate
+
+    def videoTitle(self):
+        """Title of the video item"""
+        return self.obj.Title()
+
+    def videoDescription(self):
+        """Description for the video item"""
+        return self.obj.getDescription()
+
+    def guid(self):
+        return self.obj.UID()
 
 class _Article(Placeholder_Article):
 
@@ -351,7 +378,7 @@ class _Article(Placeholder_Article):
 
     def video(self):
         return None
-        #return Video(self.obj.getVideoClip())
+        #return Video(self.getVideo())
 
     def gallery(self):
         """return a single rfasite.slideshow as a PhotoGallery associated with the article"""
