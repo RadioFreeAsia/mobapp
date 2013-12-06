@@ -160,6 +160,7 @@ class Media(object):
     def __init__(self):
         raise NotImplementedError, "Can't instantiate abstract parent 'media'"
 
+    @property
     def _article_parent(self):
         """Returns None if Media has no parent that's a Story
            Otherwise, return the story this slideshow is contained within
@@ -182,7 +183,7 @@ class Media(object):
         return self._parent
 
     def _article_parent_id(self):
-        return self._article_parent().id()
+        return self._article_parent.id()
 
 
 class Image(Media):
