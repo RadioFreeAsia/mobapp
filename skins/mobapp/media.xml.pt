@@ -33,7 +33,18 @@
                tal:content="content">Article Content</content>
       </tal:x>
 
-      <video tal:condition="video">
+      <video tal:condition="video"
+             tal:attributes="id video/id;
+                             relType video/relType;
+                             duration video/duration;
+                             width video/width;
+                             height video/height;
+                             url video/url;
+                             date video/date;"
+                             >
+         <videoTitle tal:content="video/title">Title</videoTitle>
+         <videoDescription tal:content="video/description">Description</videoDescription>
+
       </video>
       <photogallery tal:condition="photogallery"
                     tal:attributes="id photogallery/id">

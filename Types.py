@@ -313,11 +313,11 @@ class Video(Media):
         """Publication date"""
         return self._article_parent.pubDate
 
-    def videoTitle(self):
+    def title(self):
         """Title of the video item"""
         return self.obj.Title()
 
-    def videoDescription(self):
+    def description(self):
         """Description for the video item"""
         return self.obj.getDescription()
 
