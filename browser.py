@@ -311,7 +311,7 @@ class MobappMediaView(MobappBaseView):
             self.info["articles"].append(dest_article)
 
         if isinstance(media_obj, Types.PhotoGallery):
-            dest_article.gallery.mergeGallery(media_obj)
+            dest_article.gallery = media_obj
         if isinstance(media_obj, Types.Video):
             dest_article.video = media_obj
 
