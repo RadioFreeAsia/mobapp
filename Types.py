@@ -380,6 +380,7 @@ class _Article(Placeholder_Article):
         return None
         #return Video(self.getVideo())
 
+    @property
     def gallery(self):
         """return a single rfasite.slideshow as a PhotoGallery associated with the article"""
 
@@ -400,6 +401,13 @@ class _Article(Placeholder_Article):
                     self._gallery = PhotoGallery(obj)
 
         return self._gallery
+
+    @gallery.setter
+    def gallery(self, obj):
+        if isinstance(obj, PhotoGallery):
+            self._gallery = obj
+        else:
+            raise TypeError, "Not a PhotoGallery Object"
 
     def image(self):
         imgObj = self.obj.getFeaturedImage()

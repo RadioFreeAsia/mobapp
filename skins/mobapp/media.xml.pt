@@ -16,12 +16,12 @@
                             url article/url;
                             twitter article/twitter | none;"
              tal:define="video article/video;
-                         photogallery article/photogallery">
+                         photogallery article/gallery">
       <tal:x tal:condition="items/showTitle"
              tal:define="title article/title">
       <title tal:condition="items/CDATA_Title"
              tal:content="structure python: '&lt;![CDATA[' + title + ']]&gt;'">CDATA Article Title</title>
-       
+
       <title tal:condition="not: items/CDATA_Title"
              tal:content="title">Article Title</title>
       </tal:x>
@@ -37,13 +37,13 @@
       </video>
       <photogallery tal:condition="photogallery"
                     tal:attributes="id photogallery/id">
-        <photogalleryTitle tal:content="photogallery/title"></photogalleryTitle>          
+        <photogalleryTitle tal:content="photogallery/title"></photogalleryTitle>
         <photo tal:repeat="photo photogallery/photos"
                tal:attributes="id photo/id;
                                order photo/order;
                                url photo/url">
           <photoTitle tal:content="photo/title"></photoTitle>
-          <photoDescription tal:content="photo/description"></photoDescription> 
+          <photoDescription tal:content="photo/description"></photoDescription>
         </photo>
       </photogallery>
     </article>
