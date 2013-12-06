@@ -228,9 +228,9 @@ class PhotoGallery(Media):
 
         if ISlideshow.providedBy(obj):
             if g_id=="NaN":
-                g_id = obj.UID()
+                self.id = obj.UID()
             if title=="":
-                title = obj.Title()
+                self.title = obj.Title()
             self.addSlideshow(obj)
         elif IImage.providedBy(obj):
             self.addImage(obj)
