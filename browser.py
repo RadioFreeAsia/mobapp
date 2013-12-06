@@ -276,10 +276,8 @@ class MobappBreakingNewsView(MobappBaseView):
 class MobappMediaView(MobappBaseView):
     """Present videos and slideshows as a selection of media
     """
-
     photo_types = ["Slideshow",]
     video_types = ["Video Link", "Youtube Link", "Kaltura Video"]
-
 
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
@@ -301,28 +299,21 @@ class MobappMediaView(MobappBaseView):
 
     def add_media(self, media_obj):
 
-        def make_article(media_obj):
-
-            if isinstance(media_obj, Types.PhotoGallery):
-                article.photogallery = media_obj
-            if isinstance(media_obj, Types.Video):
-                article.video = media_obj
-            return article
-
         dest_article = None
+        #search to see if we have this article already.
         for article in self.info["articles"]:
             if article.id() == media_obj._article_parent_id():
                 dest_article = article
                 break
 
         if dest_article is None:
-            dest_article = media_obj._article_parent()
-            self.info["articles"].append(make_article(media_obj))
-        else:
-            if isinstance(media_obj, Types.Image):
-                dest_article.photogallery.addImage(media_obj)
-            elif isinstance(media_obj, Types.PhotoGallery):
-                dest_article.photogallery.mergeGallery(media_obj)
+            dest_article = media_obj._article_parent_id()
+            self.info["articles"].append(dest_article)
+
+        if isinstance(media_obj, Types.PhotoGallery):
+            dest_article.photogallery.mergeGallery(media_obj)
+        if isinstance(media_obj, Types.Video):
+            dest_article.video = media_obj
 
     def items(self):
         super(MobappMediaView, self).items()
