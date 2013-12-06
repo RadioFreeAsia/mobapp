@@ -288,11 +288,11 @@ class MobappMediaView(MobappBaseView):
         self.Photos = False
 
         if not self.Media:
-            self.Videos = True
+            #self.Videos = True
             self.Photos = True
 
-        if "V" in self.Media:
-            self.Videos = True
+        #if "V" in self.Media:
+            #self.Videos = True
 
         if "P" in self.Media:
             self.Photos = True
