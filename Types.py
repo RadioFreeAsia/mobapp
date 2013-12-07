@@ -112,7 +112,10 @@ class AudioClip(object):
 
     def url(self):
         if self.obj:
-            return self.obj.absolute_url()
+            url = self.obj.absolute_url()
+            if not url.endswith(".mp3"):
+		url +="?f="+self.obj.getFilename()
+            return url
         else:
             return self.segment['streaming_url']
 
