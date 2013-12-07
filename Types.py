@@ -92,7 +92,10 @@ class AudioClip(object):
 
     def __filename(self):
         if self.obj:
-            return self.obj.id
+            try:
+                return self.obj.getFilename()
+            except AttributeError:
+                return self.obj.id
         else:
             parsed = urlparse.urlparse(self.segment['url'])
             return basename(parsed.path)
@@ -150,8 +153,11 @@ class AudioClip(object):
             return 'c'
 
     def mime(self):
-        mt_tool = getToolByName(self.obj.getSubsite(), "mimetypes_registry")
-        return mt_tool.lookupExtension(self.__filename())
+        try:
+            return self.obj.getContentType()
+        except AttributeError:
+            mt_tool = getToolByName(self.obj.getSubsite(), "mimetypes_registry")
+            return mt_tool.lookupExtension(self.__filename())
 
 
 class Media(object):
@@ -362,6 +368,7 @@ class _Article(Placeholder_Article):
         #ac_allowed = IAllowed(self.obj.getAudioClip())
         #audio_obj = ac_allowed.allowedOrNone()
 
+        import pdb; pdb.set_trace()
         clips = self.obj.getAudioClip()
 
         if clips:
