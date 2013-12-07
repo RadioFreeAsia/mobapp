@@ -368,7 +368,6 @@ class _Article(Placeholder_Article):
         #ac_allowed = IAllowed(self.obj.getAudioClip())
         #audio_obj = ac_allowed.allowedOrNone()
 
-        import pdb; pdb.set_trace()
         clips = self.obj.getAudioClip()
 
         if clips:
