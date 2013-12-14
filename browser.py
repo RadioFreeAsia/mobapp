@@ -16,11 +16,13 @@ import utils
 SITEID = 0  #There is only one site, and it's rfa.org
 
 class MobappBaseView(BrowserView):
+
+    MaxArticles = 30
+    DefaultDays = 30
+
     #TODO: move query to base and populate with, at least, "published" state.
     def __init__(self, context, request):
         super(MobappBaseView, self).__init__(context, request)
-
-        self.MaxArticles = 30
 
         self.cirequest = utils.CaseInsensitiveDict()
         for key, value in request.form.iteritems():
@@ -40,7 +42,7 @@ class MobappBaseView(BrowserView):
         if self.Zones == [""]:
             self.Zones = []
 
-        self.DayCount = int(self.cirequest.get("DayCount", 30))
+        self.DayCount = int(self.cirequest.get("DayCount", self.DefaultDays))
         self.Count = int(self.cirequest.get("Count", 30))
         if self.Count > self.MaxArticles:
             self.Count=self.MaxArticles
@@ -276,8 +278,9 @@ class MobappBreakingNewsView(MobappBaseView):
 class MobappMediaView(MobappBaseView):
     """Present videos and slideshows as a selection of media
     """
+    DefaultDays = 90
     photo_types = ["Slideshow",]
-    video_types = ["VideoLink", "YoutubeLink", "KalturaVideo"]
+    video_types = ["VideoLink", "YoutubeLink", "KalturaVideo"] #we need an IVideo interface marker!
 
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
@@ -353,8 +356,7 @@ class MobappMediaView(MobappBaseView):
 
             articleBrains = self.catalog.search(query_request=query,
                                                 sort_index = 'effective',
-                                                reverse = 1,
-                                                limit=self.Count)
+                                                reverse = 1)
 
             articlePaths = [brain.getPath() for brain in articleBrains]
             brains = self.catalog.search(query_request={'portal_type': media_types,
