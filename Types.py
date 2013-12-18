@@ -3,7 +3,8 @@
 """
 
 import datetime
-from pytz import timezone, utc
+from pytz import timezone
+from pytz import UTC
 
 import urlparse
 from os.path import basename
@@ -19,23 +20,30 @@ from Products.rfasite.interfaces import IImage, ISlideshow
 
 import utils
 
-def format_date(date):
-
-    #Totally fake the time zone.  strftime %Z seems broken, or I'm just confusing DateTime's with datetime's
-
-    #Time Zone support here is really, totally broken.  Yes, I know.
+def format_date(date, tzinfo=None):
 
     #Are we a datetime or a DateTime?
     if hasattr(date, 'utcdatetime'): #we are a Zope DateTime!
-        utcdate = date.utcdatetime()
+        date = date.utcdatetime()
 
-    else: #we are a python datetime!
-        utcdate = date
+    #else: #we are a python datetime!
+    #    date = date
 
-    utcdatestr = date.strftime("%a, %d %b %Y %H:%M:%S")
-    utcdatestr += " UTC"
+    #calling this function 'naive' will attach a UTC timezone
+    if date.tzinfo is None and tzinfo is None:
+        date = UTC.localize(date)
 
-    return utcdatestr
+    #calling this function with a tzinfo arg will:
+    elif tzinfo is not None:
+        if date.tzinfo is None: #localize an existing naive datetime
+            date = tzinfo.localize(date)
+        else: #convert a non-naive datetime into the provided timezone
+            date = date.astimezone(tzinfo)
+
+    if date.tzinfo.tzname(date) is not None:
+        return date.strftime("%a, %d %b %Y %H:%M:%S %Z")
+    else: #we only have a UTC offset
+        return date.strftime("%a, %d %b %Y %H:%M:%S %z")
 
 class Placeholder_Article(object):
     """A representation of a "Null" Article"""
@@ -83,12 +91,13 @@ class Placeholder_Author(object):
 
 
 class AudioClip(object):
-    def __init__(self, ploneObj=None, streamerSegment=None):
+    def __init__(self, ploneObj=None, streamerSegment=None, localTz=None):
         if not any([ploneObj, streamerSegment]):
             raise ValueError, "must provide either ploneObj or streamerSegment to AudioClip init"
 
         self.obj = ploneObj
         self.segment = streamerSegment
+        self.localTz = localTz
 
     def __filename(self):
         if self.obj:
@@ -119,7 +128,7 @@ class AudioClip(object):
         else:
             return self.segment['streaming_url']
 
-    def date(self):
+    def _dateUTC(self):
         if self.obj:
             if self.obj.effective().year() > 2000:
                 date = self.obj.effective()
@@ -127,20 +136,26 @@ class AudioClip(object):
                 date = self.obj.created()
 
         else:
-            date = datetime.datetime(int(self.segment['year']), int(self.segment['month']), int(self.segment['day']),
-                                     int(self.segment['hour']), int(self.segment['minute']))
+            date = self.segment['filedate']
+            date = UTC.localize(date)
 
-        return format_date(date)
+        return date
+
+    def date(self):
+        return format_date(self._dateUTC())
 
     def datelocal(self):
-        return None
+        if self.obj:
+            return None #TODO
+        else:
+            localdate = self._dateUTC().astimezone(self.localTz)
+            return format_date(localdate)
 
     def title(self):
         if self.obj:
             return self.obj.Title()
         else:
-            return ('%(year)s/%(month)s/%(day)s - '
-                    '%(hour)s:%(minute)s %(lang)s' % self.segment)
+            return self.segment['lang']
 
     def description(self):
         if self.obj:

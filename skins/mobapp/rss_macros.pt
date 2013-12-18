@@ -110,8 +110,8 @@
     <program tal:attributes="id program/id;
                              duration program/duration;
                              url program/url;
-                             date string:;
-                             datelocal program/datelocal;
+                             date program/date;
+                             dateLocal program/datelocal;
                              ">
       <programTitle tal:content="program/title"></programTitle>
       <programDescription tal:content="program/description"></programDescription>

@@ -83,6 +83,18 @@ class MobappBaseView(BrowserView):
                                             request=self.request)
 
 
+        #set the timezone
+        tzOffset = getattr(self.context, 'getTimezoneOffset', lambda: 0)()
+
+        #we assume US/Eastern when we don't have a timezone offset set.
+        # This needs work on the subsite - we shouldn't set numeric offsets, we should set tzinfo objects
+        if tzOffset == 0:
+            self.subsiteTz = pytz.timezone('US/Eastern')
+        else:
+            #convert to minutes
+            offset = int(tzOffset*60)
+            self.subsiteTz = pytz.FixedOffset(offset)
+
     def items(self):
         self.info  = {"site": SITEID,
                       "showImg": self.Image,
@@ -253,7 +265,7 @@ class MobappAudioArchiveView(MobappBaseView):
         #if self.AudioId: #XXX figure out how to look up by ID, if needed
 
         for s in segments:
-            audioObj = Types.AudioClip(streamerSegment=s)
+            audioObj = Types.AudioClip(streamerSegment=s, localTz=self.subsiteTz)
             if audioObj is not None:
                 self.info["programs"].append(audioObj)
 
