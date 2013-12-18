@@ -137,7 +137,6 @@ class AudioClip(object):
 
         else:
             date = self.segment['filedate']
-            date = UTC.localize(date)
 
         return date
 
