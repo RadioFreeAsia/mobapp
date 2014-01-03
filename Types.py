@@ -117,7 +117,7 @@ class AudioClip(object):
 
     def duration(self):
         #TODO: Figure out a way to get the 'duration' of an audio clip.
-        return 90
+        return 5400 #90 mins - just a non-zero number
 
     def url(self):
         if self.obj:
