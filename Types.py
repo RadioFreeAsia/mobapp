@@ -48,29 +48,51 @@ def format_date(date, tzinfo=None):
 class Placeholder_Article(object):
     """A representation of a "Null" Article"""
     default_id = "_placeholder_id"
+    
+    placeholder = True
 
     def __init__(self):
         pass
+    
     def id(self):
         return self.default_id
+    
     def zone(self):
         return 0
+    
+    @property
     def pubDate(self):
-        return format_date(datetime.datetime(1900,1,1,0,0))
+        if self._pubDate is None:
+            return format_date(datetime.datetime(1900,1,1,0,0))
+        else:
+            return format_date(self._pubDate)
+    
+    
+    @pubDate.setter
+    def pubDate(self, datetime_value):   
+        self._pubDate = datetime_value    
+        
     def url(self):
         return None
+    
     def twitter(self):
         return None
+    
     def title(self):
         return "placeholder article"
+    
     def content(self):
         return "placeholder article"
+    
     def audio(self):
         return None
+    
     def video(self):
         return None
+    
     def image(self):
         return None
+    
     def authors(self):
         return []
 
@@ -78,6 +100,8 @@ class Placeholder_Article(object):
 class Placeholder_Author(object):
     """A representation of a "Null" Author"""
     #This should really never happen, but it's used when Plone returns "None" for a lookup on an author id.
+
+    placeholder = True
 
     def getUser(self):
         class fakeuser(object):
@@ -309,7 +333,17 @@ class Video(Media):
     """Mobapp representation of a video"""
     def __init__(self, obj):
         self.obj = obj
-
+        self.kalturaObj = getattr(self.obj, 'KalturaObject', None)
+        
+        #if we are a video within a bogus 'placeholder' article, set the date on the article to something sane
+        if self.article_parent.placeholder:
+            #try using the date from plone video object.
+            if self.obj.effective().year() > 1000:  #if it's not set, year will be 1000
+                self.article_parent.pubDate = self.obj.effective()
+            else:
+                #use the date in the kalturaObject
+                self.article_parent.pubDate = datetime.datetime.fromtimestamp(self.kalturaObj.getUpdatedAt())
+                
     def id(self):
         return self.guid()
 
@@ -319,7 +353,7 @@ class Video(Media):
 
     def duration(self):
         """Duration of the video data (seconds)"""
-        return 0 #XXX TODO
+        return 600 #XXX TODO
 
     def width(self):
         """Width (pixels) of the video"""
@@ -331,11 +365,15 @@ class Video(Media):
 
     def url(self):
         """Location of the video file"""
-        return self.obj.getRemoteUrl()
+        if self.kalturaObj:
+            return self.kalturaObj.dataUrl
+        else:
+            return None
 
     def date(self):
         """Publication date"""
-        return self.article_parent.pubDate
+        return datetime.datetime.now() ###TODO
+        #return self.article_parent.pubDate(date)
 
     def title(self):
         """Title of the video item"""
@@ -347,8 +385,13 @@ class Video(Media):
 
     def guid(self):
         return self.obj.UID()
+    
+    def thumbnail(self):
+        return "http://cdnbakmi.kaltura.com/p/1251832/sp/125183200/thumbnail/entry_id/1_0dx0sfs1/version/100001/acv/131/width/136/vid_sec/15"
 
 class _Article(Placeholder_Article):
+
+    placeholder = False
 
     def __init__(self, obj, request=None):
         self.obj = obj

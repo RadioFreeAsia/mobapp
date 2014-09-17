@@ -87,8 +87,8 @@ class MobappBaseView(BrowserView):
         tzOffset = getattr(self.context, 'getTimezoneOffset', lambda: 0)()
 
         #we assume US/Eastern when we don't have a timezone offset set.
-        # This needs work on the subsite - we shouldn't set numeric offsets, we should set tzinfo objects
-        if tzOffset == 0:
+        #XXX we shouldn't set numeric offsets, we should set tzinfo objects to support DST
+        if tzOffset == 0 or tzOffset is None:
             self.subsiteTz = pytz.timezone('US/Eastern')
         else:
             #convert to minutes
@@ -292,23 +292,25 @@ class MobappMediaView(MobappBaseView):
     """
     DefaultDays = 90
     photo_types = ["Slideshow",]
-    video_types = ["VideoLink", "YoutubeLink", "KalturaVideo"] #we need an IVideo interface marker!
+    #we need an IVideo interface marker!
+    #video_types = ["VideoLink", "YoutubeLink", "Kaltura Video"] 
+    video_types = ["Kaltura Video"]
 
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
-        self.Media = self.request.get("Media", "").upper()
+        self.Media = self.request.get("media", "").upper()
+        
+        #backwards compatability - capital 'M' on media:
+        if not self.Media:
+            self.Media = self.request.get("Media", "").upper()
+        
         self.MediaID = self.request.get("MediaId", "")
 
         self.Videos = False
         self.Photos = False
 
-        if not self.Media:
-            #self.Videos = True
-            self.Photos = True
-
-        #if "V" in self.Media:
-            #self.Videos = True
-
+        if "V" in self.Media:
+            self.Videos = True
         if "P" in self.Media:
             self.Photos = True
 
@@ -330,13 +332,66 @@ class MobappMediaView(MobappBaseView):
         if isinstance(media_obj, Types.Video):
             dest_article.video = media_obj
 
+    def query_photos(self):
+        query ={}
+        media_types = self.photo_types
+
+        if self.ZoneIDs:
+            sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
+            zonePaths = [brain.getPath() for brain in sectionBrains]
+            query['path'] = {'query':zonePaths, 'depth':2}
+
+        #we search for published articles, and return media within those articles.
+        # This avoids requiring Slideshows and Videos to be 'published'
+        query['portal_type'] = "Story"
+        query['review_state'] = "published"
+        end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
+        start = datetime.datetime.utcnow() - datetime.timedelta(days=self.DayCount)
+        query['effective'] = {'query':(start,end), 'range':'min:max'}
+
+        articleBrains = self.catalog.search(query_request=query,
+                                            sort_index = 'effective',
+                                            reverse = 1)
+
+        articlePaths = [brain.getPath() for brain in articleBrains]
+        brains = self.catalog.search(query_request={'portal_type': media_types,
+                                                    'path': {'query':articlePaths,
+                                                             'depth':1}
+                                                   },
+                                     limit=self.Count)[:self.Count]
+
+
+        zope_objects = [brain.getObject() for brain in brains]        
+    
+        return zope_objects
+            
+            
+    def query_videos(self):
+        query ={}
+        media_types = self.video_types
+        
+        #for now, videos (Kaltura) do not have zones - revisit
+        #if self.ZoneIDs:
+        #    sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
+        #    zonePaths = [brain.getPath() for brain in sectionBrains]
+        #    query['path'] = {'query':zonePaths, 'depth':2}
+        
+        
+        query['portal_type'] = media_types
+        query['review_state'] = ["published", "visible"]
+        brains = self.catalog.search(query_request=query,
+                                     sort_index = 'effective',
+                                     reverse = 1,
+                                     limit=self.Count)[:self.Count]
+        
+        zope_objects = [brain.getObject() for brain in brains]
+        
+        return zope_objects
+
     def items(self):
         super(MobappMediaView, self).items()
 
-        media_types = []
-
         self.info["articles"] = []
-
         zope_objects = []
 
         if self.MediaID: #provided an id: return just that object
@@ -346,39 +401,9 @@ class MobappMediaView(MobappBaseView):
 
         else: #we query the catalog
             if self.Photos:
-                media_types += self.photo_types
+                zope_objects += self.query_photos()
             if self.Videos:
-                media_types += self.video_types
-
-            query ={}
-            query['portal_type'] = media_types
-
-            if self.ZoneIDs:
-                sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
-                zonePaths = [brain.getPath() for brain in sectionBrains]
-                query['path'] = {'query':zonePaths, 'depth':2}
-
-            #we search for published articles, and return media within those articles.
-            # This avoids requiring Slideshows and Videos to be 'published'
-            query['portal_type'] = "Story"
-            query['review_state'] = "published"
-            end = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
-            start = datetime.datetime.utcnow() - datetime.timedelta(days=self.DayCount)
-            query['effective'] = {'query':(start,end), 'range':'min:max'}
-
-            articleBrains = self.catalog.search(query_request=query,
-                                                sort_index = 'effective',
-                                                reverse = 1)
-
-            articlePaths = [brain.getPath() for brain in articleBrains]
-            brains = self.catalog.search(query_request={'portal_type': media_types,
-                                                        'path': {'query':articlePaths,
-                                                                 'depth':1}
-                                                       },
-                                         limit=self.Count)[:self.Count]
-
-
-            zope_objects = [brain.getObject() for brain in brains]
+                zope_objects += self.query_videos()
 
         for obj in zope_objects:
             if obj.portal_type in self.photo_types:

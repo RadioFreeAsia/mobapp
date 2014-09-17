@@ -3,6 +3,8 @@
  xmlns:metal="http://xml.zope.org/namespaces/metal"
  xmlns:tal="http://xml.zope.org/namespaces/tal">
 
+<title metal:fill-slot="title">Media</title>
+
 <items metal:fill-slot="items" tal:omit-tag=""
        tal:define="info context/@@mediainfo;
                    items info/items;
@@ -15,8 +17,8 @@
                             pubDate article/pubDate;
                             url article/url;
                             twitter article/twitter | none;"
-             tal:define="video article/video;
-                         photogallery article/gallery">
+             tal:define="video article/video | nothing;
+                         photogallery article/gallery | nothing">
       <tal:x tal:condition="items/showTitle"
              tal:define="title article/title">
       <title tal:condition="items/CDATA_Title"
@@ -40,11 +42,12 @@
                              width video/width;
                              height video/height;
                              url video/url;
-                             date video/date;"
+                             date video/date;
+                             thumbnail video/thumbnail;"
                              >
          <videoTitle tal:content="video/title">Title</videoTitle>
          <videoDescription tal:content="video/description">Description</videoDescription>
-
+         <guid tal:content="video/id">guid</guid>
       </video>
       <photogallery tal:condition="photogallery"
                     tal:attributes="id photogallery/id">
