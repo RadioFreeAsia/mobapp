@@ -349,7 +349,11 @@ class Video(Media):
 
     def relType(self):
         """Defines relation between article and video => 0=SameItem, 1=MainImage,2=EmbededInContent"""
-        return 2 #XXX TODO
+        #if this video is wrapped in a placeholder, then it's a stand-alone video and should be considered 'sameItem'
+        if self.article_parent.placeholder:
+            return 0
+        
+        return 2 #otherwise, it's a video embedded in a story
 
     def duration(self):
         """Duration of the video data (seconds)"""
@@ -387,7 +391,11 @@ class Video(Media):
         return self.obj.UID()
     
     def thumbnail(self):
-        return "http://cdnbakmi.kaltura.com/p/1251832/sp/125183200/thumbnail/entry_id/1_0dx0sfs1/version/100001/acv/131/width/136/vid_sec/15"
+        width = '136'
+        vid_sec = '15'
+        url = self.kalturaObj.getThumbnailUrl()
+        url = url + "/width/" + width + "/vid_sec/" + vid_sec        
+        return url
 
 class _Article(Placeholder_Article):
 
