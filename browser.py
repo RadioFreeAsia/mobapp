@@ -252,7 +252,7 @@ class MobappArticlesView(MobappBaseView):
 class MobappAudioArchiveView(MobappBaseView):
     def __init__(self, context, request):
         super(MobappAudioArchiveView, self).__init__(context, request)
-        self.AudioId = self.request.get("AudioId", "")
+        self.AudioId = self.cirequest.get("AudioId", "")
 
     def items(self):
         super(MobappAudioArchiveView, self).items()
@@ -298,13 +298,8 @@ class MobappMediaView(MobappBaseView):
 
     def __init__(self, context, request):
         super(MobappMediaView, self).__init__(context, request)
-        self.Media = self.request.get("media", "").upper()
-        
-        #backwards compatability - capital 'M' on media:
-        if not self.Media:
-            self.Media = self.request.get("Media", "").upper()
-        
-        self.MediaID = self.request.get("MediaId", "")
+        self.Media = self.cirequest.get("media", "").upper()
+        self.MediaID = self.cirequest.get("MediaId", "")
 
         self.Videos = False
         self.Photos = False
@@ -425,7 +420,7 @@ class MobappSearchView(MobappBaseView, SearchRetailView):
 
     def __init__(self, context, request):
         MobappBaseView.__init__(self, context, request)
-        self.search_text = self.request.get("q", "")
+        self.search_text = self.cirequest.get("q", "")
         self.results = self._getResults()
 
         #just pass some stuff to batch 1 page
@@ -453,7 +448,7 @@ class MobappTopStoriesView(MobappBaseView):
     def __init__(self, context, request):
         """ request parameter 'odd' will guarantee an odd number of results returned, if total number of results is greater than 3"""
         super(MobappTopStoriesView, self).__init__(context, request)
-        self.odd = self.request.get("odd", 0) #not implemented
+        self.odd = self.cirequest.get("odd", 0) #not implemented
         self.Count = 5
 
     def items(self):
