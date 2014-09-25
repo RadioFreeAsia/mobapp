@@ -312,10 +312,11 @@ class MobappMediaView(MobappBaseView):
     def add_media(self, media_obj):
 
         dest_article = None
+        
         #search to see if we have this article already.
         for article in self.info["articles"]:
-            if article.id() == media_obj.article_parent_id:
-                dest_article = article
+            if article.id() == media_obj.article_parent_id and not media_obj.article_parent.placeholder:
+                dest_article = article #matching article, and it's not a placeholder article
                 break
 
         if dest_article is None:

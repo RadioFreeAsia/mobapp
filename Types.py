@@ -48,11 +48,12 @@ def format_date(date, tzinfo=None):
 class Placeholder_Article(object):
     """A representation of a "Null" Article"""
     default_id = "_placeholder_id"
-    
     placeholder = True
 
     def __init__(self):
-        pass
+        self._pubDate = None
+        self._title = None
+        self._content = None
     
     def id(self):
         return self.default_id
@@ -67,7 +68,6 @@ class Placeholder_Article(object):
         else:
             return format_date(self._pubDate)
     
-    
     @pubDate.setter
     def pubDate(self, datetime_value):   
         self._pubDate = datetime_value    
@@ -78,11 +78,27 @@ class Placeholder_Article(object):
     def twitter(self):
         return None
     
+    @property
     def title(self):
-        return "placeholder article"
+        if self._title is None:
+            return "placeholder article"
+        else:
+            return self._title
+        
+    @title.setter
+    def title(self, value):
+        self._title = value
     
+    @property
     def content(self):
-        return "placeholder article"
+        if self._content is None:
+            return "placeholder article"
+        else:
+            return self._content
+    
+    @content.setter
+    def content(self, value):
+        self._content = value
     
     def audio(self):
         return None
@@ -335,7 +351,7 @@ class Video(Media):
         self.obj = obj
         self.kalturaObj = getattr(self.obj, 'KalturaObject', None)
         
-        #if we are a video within a bogus 'placeholder' article, set the date on the article to something sane
+        #if we are a video within a bogus 'placeholder' article, set some attributes on the placeholder:
         if self.article_parent.placeholder:
             #try using the date from plone video object.
             if self.obj.effective().year() > 1000:  #if it's not set, year will be 1000
@@ -343,6 +359,9 @@ class Video(Media):
             else:
                 #use the date in the kalturaObject
                 self.article_parent.pubDate = datetime.datetime.fromtimestamp(self.kalturaObj.getUpdatedAt())
+                
+            self.article_parent.title = self.title()
+            self.article_parent.content = None
                 
     def id(self):
         return self.guid()
