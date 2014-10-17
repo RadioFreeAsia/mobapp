@@ -51,6 +51,8 @@ class MobappBaseView(BrowserView):
         self.AuthorID = self.cirequest.get("AuthorId", None)
         self.Title = utils.toBool(self.cirequest.get("Title", True))
         self.TitleAsCDATA = utils.toBool(self.cirequest.get("TitleAsCDATA", False))
+        self.Intro = utils.toBool(self.cirequest.get("Introduction", True))
+        self.IntroAsCDATA = utils.toBool(self.cirequest.get('IntroductionAsCDATA', False))
         self.Content = utils.toBool(self.cirequest.get("Content", True))
         self.ContentAsCDATA = utils.toBool(self.cirequest.get("ContentAsCDATA", False))
         self.Image = utils.toBool(self.cirequest.get("Image", True))
@@ -101,6 +103,8 @@ class MobappBaseView(BrowserView):
                       "showTitle": self.Title,
                       "showImgTitle": self.ImageTitle,
                       "CDATA_Title": self.TitleAsCDATA,
+                      "showIntro": self.Intro,
+                      "CDATA_Intro": self.IntroAsCDATA,
                       "showContent": self.Content,
                       "CDATA_Content": self.ContentAsCDATA,
                       "showAuthors": self.Authors,

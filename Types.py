@@ -449,6 +449,9 @@ class _Article(Placeholder_Article):
     def content(self):
         renderedText = self.obj.getText()
         return utils.cleanHtml(renderedText)
+    
+    def intro(self):
+        return self.obj.Description()
 
     def audios(self):
         ###XXX IAllowed not working here

@@ -28,6 +28,17 @@
         <title tal:condition="not: items/CDATA_Title"
                tal:content="title">Article Title</title>
       </tal:x>
+      
+      <tal:x tal:condition="items/showIntro"
+             tal:define="intro article/intro">
+        <introduction tal:condition="items/CDATA_Intro"
+               tal:content="structure python: '&lt;![CDATA[' + intro + ']]&gt;'">CDATA Article Intro</introduction>
+
+        <introduction tal:condition="not: items/CDATA_Intro"
+               tal:content="intro">Article Intro</introduction>
+      </tal:x>
+      
+      
       <tal:x tal:condition="items/showContent"
              tal:define="content article/content">
         <content tal:condition="items/CDATA_Content"
@@ -97,6 +108,7 @@
           </photo>
         </photogallery>
       </metal:galleryslot>
+      <!-- Related Stories Go Here -->
     </article>
   </metal:macro>
 
