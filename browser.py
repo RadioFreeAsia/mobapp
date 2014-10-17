@@ -231,7 +231,7 @@ class MobappArticlesView(MobappBaseView):
         if self.ZoneIDs:
             sectionBrains = self.catalog.searchResults(UID=self.ZoneIDs)
             zonePaths = [brain.getPath() for brain in sectionBrains]
-            query['path'] = {'query':zonePaths, 'depth':2}
+            query['path'] = {'query':zonePaths, 'depth':3} #depth 3 because of http://webber.rfa.org/trac/ticket/198
 
         if self.AuthorID:
             query['Creator'] = self.AuthorID
