@@ -54,9 +54,19 @@ class Placeholder_Article(object):
         self._pubDate = None
         self._title = None
         self._content = None
+        self._id = None
+        self._url = None
     
+    @property
     def id(self):
-        return self.default_id
+        if self._id is None:
+            return self.default_id
+        else:
+            return self._id
+        
+    @id.setter
+    def id(self, value):
+        self._id = value
     
     def zone(self):
         return 0
@@ -72,8 +82,17 @@ class Placeholder_Article(object):
     def pubDate(self, datetime_value):   
         self._pubDate = datetime_value    
         
+    @property
     def url(self):
-        return None
+        #written this way for readability & maintainability, don't change.
+        if self._url is None:
+            return None
+        else:
+            return self._url
+        
+    @url.setter
+    def url(self, value):
+        self._url = value
     
     def twitter(self):
         return None
@@ -247,7 +266,7 @@ class Media(object):
 
     @property
     def article_parent_id(self):
-        return self.article_parent.id()
+        return self.article_parent.id
 
 class Image(Media):
 
@@ -351,17 +370,22 @@ class Video(Media):
         self.obj = obj
         self.kalturaObj = getattr(self.obj, 'KalturaObject', None)
         
-        #if we are a video within a bogus 'placeholder' article, set some attributes on the placeholder:
+        #if we are a video within a bogus 'placeholder' article, 
+        #set attributes on the placeholder to make the mobile app work correctly.
         if self.article_parent.placeholder:
+                
+            self.article_parent.title = self.title()
+            self.article_parent.content = None
+            self.article_parent.id = self.guid()
+            self.article_parent.url = self.vidpageUrl()
+            
             #try using the date from plone video object.
             if self.obj.effective().year() > 1000:  #if it's not set, year will be 1000
                 self.article_parent.pubDate = self.obj.effective()
             else:
                 #use the date in the kalturaObject
                 self.article_parent.pubDate = datetime.datetime.fromtimestamp(self.kalturaObj.getUpdatedAt())
-                
-            self.article_parent.title = self.title()
-            self.article_parent.content = None
+            
                 
     def id(self):
         return self.guid()
@@ -392,6 +416,15 @@ class Video(Media):
             return self.kalturaObj.dataUrl
         else:
             return None
+        
+    def vidpageUrl(self):
+        #XXX does not support dynamic video page name
+        #XXX makes assumption that video page is always
+        # rfa.org/language/video
+        base = self.obj.getSubsite().absolute_url()
+        url = base + '/video' + '?v={entryId}'
+        
+        return url.format(entryId=self.kalturaObj.getId())
 
     def date(self):
         """Publication date"""
@@ -425,7 +458,9 @@ class _Article(Placeholder_Article):
         self.request = request
         self._gallery = None
 
-    #oops, overridden built-in func 'id'.  beware.
+    #Overriding @property from parent - beware
+    # Bugs are coming.
+    # Test videos with real article parents
     def id(self):
         return self.obj.UID()
 
