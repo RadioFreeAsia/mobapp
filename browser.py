@@ -319,7 +319,7 @@ class MobappMediaView(MobappBaseView):
         
         #search to see if we have this article already.
         for article in self.info["articles"]:
-            if article.id() == media_obj.article_parent_id and not media_obj.article_parent.placeholder:
+            if article.id == media_obj.article_parent_id and not media_obj.article_parent.placeholder:
                 dest_article = article #matching article, and it's not a placeholder article
                 break
 

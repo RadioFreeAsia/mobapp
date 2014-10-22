@@ -458,9 +458,7 @@ class _Article(Placeholder_Article):
         self.request = request
         self._gallery = None
 
-    #Overriding @property from parent - beware
-    # Bugs are coming.
-    # Test videos with real article parents
+    @property
     def id(self):
         return self.obj.UID()
 
