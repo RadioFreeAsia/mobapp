@@ -378,7 +378,7 @@ class MobappMediaView(MobappBaseView):
         
         
         query['portal_type'] = media_types
-        query['review_state'] = ["published", "visible"]
+        query['review_state'] = ["published"]
         brains = self.catalog.search(query_request=query,
                                      sort_index = 'effective',
                                      reverse = 1,
