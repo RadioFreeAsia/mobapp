@@ -1,0 +1,1 @@
+#Run with ./bin/test Products.rfasite.mobapp
