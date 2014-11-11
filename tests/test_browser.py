@@ -1,48 +1,30 @@
 import unittest
-from Products.rfasite.tests.test_browser import DummyCatalog
+from dummies import *
 
 import Products.rfasite.mobapp.browser as browser
 
 class mediaViewTests(unittest.TestCase):
         
     def testInit(self):
+        """Just the basics - to construct test framework"""
         view = browser.MobappMediaView(DummyContext(), DummyRequest())
         
-     
-class DummyContext(object):
-    def getId(self):
-        return 'dummy'
+    def testItems(self):
+        view = browser.MobappMediaView(DummyContext(), DummyRequest())
+        items = view.items()
+        
+        
+    def testSlideshow(self):
+        view = browser.MobappMediaView(DummyContext(), DummyRequest())
+        view.Photos = True
+        view.query_photos = lambda: [DummySlideshow()]  #override query_photos method to return a dummy slideshow
+        items = view.items()
+        
+        articles = items['articles']
+        self.assertEqual(len(articles), 1, msg="slideshow articles should be list of length 1")
+        gallery = articles[0].gallery
+        
+        iter(gallery) #should be iterable
+        
+        
     
-    def getSubsite(self):
-        return DummySubsite()
-    
-    @property
-    def portal_catalog(self):
-        portal_catalog = DummyCatalog('foo',
-                                      '/',
-                                      [],
-                                      )    
-    
-    
-class DummyRequest(object):
-    
-    _form = {} #the get request
-    
-    @property
-    def form(self):
-        return self._form
-    
-class DummyReferenceCatalog(object):
-    
-    def __init__(self, objects={}):
-        self.objects = objects
-    
-    def lookupObject(self, uid):
-        return self.objects[uid]    
-    
-    
-class DummySubsite(DummyContext):
-    def __init__(self, refCatalog=DummyReferenceCatalog()):
-        self.reference_catalog = refCatalog
-
-

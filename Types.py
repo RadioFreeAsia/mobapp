@@ -347,6 +347,7 @@ class PhotoGallery(Media):
         return len(self._images)
 
     def addSlideshow(self, slideshow):
+        ### check slideshow values to make sure they are plone image type.
         for ATimage in slideshow.values():
             image = Image(ATimage)
             self.addImage(image)
