@@ -63,10 +63,18 @@ def replaceEmbedsWithIframes(soup):
     objectTags = soup.findAll(lambda tag: tag.name.lower() == 'object')
 
     for oTag in objectTags:
+        #try to find the 'src' in the param elements of the object
         paramSrcTag = oTag.find('param', attrs={'name': 'src',
                                                 'value': lambda s: s.find('youtube') != -1 })
         if paramSrcTag:
-            url = paramSrcTag['value']
+            url = paramSrcTag.get('value')
+            
+        else: #no param tag found, get 'src' from embed attribute
+            embedTag = oTag.find('embed', attrs={'src': lambda s: s.find('youtube') != -1})
+            url = embedTag.get('src')
+            
+        if url is not None: #we found the youtube url
+            
             parsed = urlparse.urlparse(url)
             v_val = parsed.path.split('/')[2]   #find the youtube 'v' id
             path = "/embed/"+v_val
