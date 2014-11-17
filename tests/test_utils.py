@@ -99,6 +99,24 @@ class ReplaceEmbedsTests(unittest.TestCase):
         parsed = urlparse.urlparse(src)
         
         self.assertEqual('', parsed.query)
+        
+    def test_noParams(self):
+        """input object / embed code without params"""
+        inputString = """<p> <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" height="315" width="560"> 
+                              <embed height="315" width="560" src="https://www.youtube.com/v/QhYO_KwL2P0?hl=en_GB&amp;version=3&amp;rel=0&amp;controls=0&amp;showinfo=0" allowscriptaccess="always" allowfullscreen="true" type="application/x-shockwave-flash">
+                              </embed> 
+                             </object>
+                      """
+        
+        inputSoup = BeautifulSoup(inputString)
+        
+        resultSoup = replaceEmbedsWithIframes(inputSoup)
+        iframeElem = resultSoup.find('iframe')
+        src = iframeElem.get('src')
+
+        parsed = urlparse.urlparse(src)
+        
+        self.assertEqual('', parsed.query)
                 
 def test_suite():
     return unittest.TestSuite( 
