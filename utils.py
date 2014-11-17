@@ -77,9 +77,8 @@ def replaceEmbedsWithIframes(soup):
 
             
             iframeTag = Tag(soup, 'iframe', attrs=[(u'src',newUrl),
-                                                   (u'width',u"420"),
+                                                   (u'width',u"%100"),
                                                    (u'frameborder', u"0"),
-                                                   (u'height',u"315")
                                                    ]
                             )
 
