@@ -22,6 +22,11 @@ import utils
 
 def format_date(date, tzinfo=None):
 
+    ### TODO: calling this function with the Plone default datetime (year=1000)
+    ### will generate exceptions.  This case must be handled
+    ### This can be aggrivated by requesting an article that does not exist, 
+    ### through articles.xml view, among other ways.
+
     #Are we a datetime or a DateTime?
     if hasattr(date, 'utcdatetime'): #we are a Zope DateTime!
         date = date.utcdatetime()
