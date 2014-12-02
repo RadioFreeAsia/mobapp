@@ -43,22 +43,7 @@ def removeJavascript(soup):
 def replaceEmbedsWithIframes(soup):
     """Find occurences of (youtube) embedded videos using 'object/embed' and replace it with an iframe"""
 
-    #take this:
-    #<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
-    #        codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"
-    #        height="360" width="640">
-    #  <param name="allowFullScreen" value="true" />
-    #  <param name="allowscriptaccess" value="always" />
-    #  <param name="src" value="https://www.youtube.com/v/kc658mQqoU0" />
-    #  <param name="allowfullscreen" value="true" />
-    #  <embed height="360" width="640" src="https://www.youtube.com/v/kc658mQqoU0" allowscriptaccess="always" allowfullscreen="true" type="application/x-shockwave-flash">
-    #  </embed>
-    #</object>
-
-
-    #and turn it into this:
-    #<iframe src="//www.youtube.com/embed/kc658mQqoU0" allowfullscreen="" frameborder="0" width="500" height="345">
-    #</iframe>
+    #see tests.test_utils
 
     objectTags = soup.findAll(lambda tag: tag.name.lower() == 'object')
 
@@ -87,6 +72,7 @@ def replaceEmbedsWithIframes(soup):
             iframeTag = Tag(soup, 'iframe', attrs=[(u'src',newUrl),
                                                    (u'width',u"%100"),
                                                    (u'frameborder', u"0"),
+                                                   (u'class', u"YouTube"),
                                                    ]
                             )
 

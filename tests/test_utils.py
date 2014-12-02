@@ -100,6 +100,27 @@ class ReplaceEmbedsTests(unittest.TestCase):
         
         self.assertEqual('', parsed.query)
         
+    def testIframeClass(self):
+        """resulting iframe class attr should be 'YouTube'"""
+        inputString = """<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+        codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"
+            height="360" width="640">
+      <param name="allowFullScreen" value="true" />
+      <param name="allowscriptaccess" value="always" />
+      <param name="src" value="https://www.youtube.com/v/QhYO_KwL2P0?hl=en_GB&amp;version=3&amp;rel=0&amp;controls=0&amp;showinfo=0" />
+      <param name="allowfullscreen" value="true" />
+      <embed height="360" width="640" src="https://www.youtube.com/v/kc658mQqoU0" allowscriptaccess="always" allowfullscreen="true" type="application/x-shockwave-flash">
+      </embed>
+    </object>
+            """
+        inputSoup = BeautifulSoup(inputString)
+        
+        resultSoup = replaceEmbedsWithIframes(inputSoup)
+        iframeElem = resultSoup.find('iframe')
+        cssClass = iframeElem.get('class')
+        
+        self.assertEqual(cssClass, "YouTube")
+        
     def test_noParams(self):
         """input object / embed code without params"""
         inputString = """<p> <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" height="315" width="560"> 
