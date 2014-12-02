@@ -17,10 +17,16 @@ from AccessControl import allow_class
 
 from Products.rfasite.interfaces import IAllowed
 from Products.rfasite.interfaces import IImage, ISlideshow
+from rfa.kaltura.interfaces import IKalturaVideo
 
 import utils
 
 def format_date(date, tzinfo=None):
+
+    ### TODO: calling this function with the Plone default datetime (year=1000)
+    ### will generate exceptions.  This case must be handled
+    ### This can be aggrivated by requesting an article that does not exist, 
+    ### through articles.xml view, among other ways.
 
     #Are we a datetime or a DateTime?
     if hasattr(date, 'utcdatetime'): #we are a Zope DateTime!
@@ -458,6 +464,7 @@ class _Article(Placeholder_Article):
         self.obj = obj
         self.request = request
         self._gallery = None
+        self._video = None
 
     @property
     def id(self):
@@ -508,9 +515,26 @@ class _Article(Placeholder_Article):
             return None
 
     def video(self):
-        return None
-        #return Video(self.getVideo())
+        """return a single kalturaVideo as a Video within the cp_container body slot"""
+        #Videos are embedded via the Layout Tab, so we must journey into cp_container to find it.
+        cp = getattr(self.obj, 'cp_container', None)
+        if cp is None:
+            return None
 
+        if self._video is not None:
+            return self._video
+
+        slot = cp.filled_slots['body']
+        for elem in slot.values():
+            obj = elem.getTarget()
+            if IKalturaVideo.providedBy(obj): #XXX use IVideo when it appears - IKalturaVideo should inherit from it.
+                #be lazy.  The first Video you find is all you get!
+                self._video = Video(obj)
+                return self._video
+
+        return self._video
+    
+    
     @property
     def gallery(self):
         """return a single rfasite.slideshow as a PhotoGallery associated with the article"""
