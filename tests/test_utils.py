@@ -53,7 +53,7 @@ class ReplaceEmbedsTests(unittest.TestCase):
         resultSoup = replaceEmbedsWithIframes(inputSoup)
         iframeElem = resultSoup.find('iframe')
         
-        self.assertEqual('%100', iframeElem.get('width'))
+        self.assertEqual('100%', iframeElem.get('width'))
         
     
     def testNoAllowFullscreen(self):
