@@ -1,5 +1,6 @@
 import urlparse
 from kss.core.BeautifulSoup import BeautifulSoup, Tag
+import re
 
 def getFolderModificationDate(folderBrain, catalog):
     """Returns last time content was modified inside a folder"""
@@ -31,6 +32,8 @@ def cleanHtml(content):
     soup = removeJavascript(soup)
     soup = replaceEmbedsWithIframes(soup)
     soup = removeViewFromImages(soup)
+    soup = removeStylesFromInlineImages(soup)
+    soup = removeWidthHeightFromInlineImages(soup)
 
     return unicode(soup)
 
@@ -40,6 +43,36 @@ def removeJavascript(soup):
         item.extract()
     return soup
 
+def removeStylesFromInlineImages(soup):
+    
+    def removeInlineStyle(elemlist):
+        for elem in elemlist:
+            if isinstance(elem, basestring):
+                continue
+            if elem.get('style'):
+                del elem['style']
+            removeInlineStyle(elem.contents)
+    
+    inlineImageElems = soup.findAll('div', attrs={'class': lambda x: x and re.search('image-inline(\s|$)', x)})
+    removeInlineStyle(inlineImageElems)
+        
+    return soup
+
+def removeWidthHeightFromInlineImages(soup):
+    inlineImageElems = soup.findAll('div', attrs={'class': lambda x: x and re.search('image-inline(\s|$)', x)})
+    
+    for elem in inlineImageElems:
+        images = elem.findAll('img')
+        
+        for img in images:
+            if img.get('height'):
+                del img['height']
+            if img.get('width'):
+                del img['width']
+            
+    return soup
+        
+
 def replaceEmbedsWithIframes(soup):
     """Find occurences of (youtube) embedded videos using 'object/embed' and replace it with an iframe"""
 
@@ -47,6 +80,7 @@ def replaceEmbedsWithIframes(soup):
 
     objectTags = soup.findAll(lambda tag: tag.name.lower() == 'object')
 
+    url = None
     for oTag in objectTags:
         #try to find the 'src' in the param elements of the object
         paramSrcTag = oTag.find('param', attrs={'name': 'src',
@@ -56,7 +90,8 @@ def replaceEmbedsWithIframes(soup):
             
         else: #no param tag found, get 'src' from embed attribute
             embedTag = oTag.find('embed', attrs={'src': lambda s: s.find('youtube') != -1})
-            url = embedTag.get('src')
+            if embedTag:
+                url = embedTag.get('src')
             
         if url is not None: #we found the youtube url
             

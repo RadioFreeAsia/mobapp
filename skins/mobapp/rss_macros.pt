@@ -81,8 +81,7 @@
                                width video/width;
                                height video/height;
                                duration video/duration;
-                               url video/url;
-                               thumbnail video/thumb;">
+                               url video/url;">
           <videoTitle tal:content="video/title">Video Title</videoTitle>
           <videoDescription tal:content="video/description">Video Description</videoDescription>
           <guid tal:content="video/guid">video Guid</guid>

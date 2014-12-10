@@ -5,7 +5,6 @@ from dummies import *
 from Products.rfasite.mobapp.Types import PhotoGallery
 
 class TestGallery(unittest.TestCase):
-    """Keeping the unittests from complaining that there are no tests in here yet"""
 
     def testInit(self):
         gallery = PhotoGallery()
