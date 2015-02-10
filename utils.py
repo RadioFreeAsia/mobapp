@@ -96,7 +96,10 @@ def replaceEmbedsWithIframes(soup):
         if url is not None: #we found the youtube url
             
             parsed = urlparse.urlparse(url)
-            v_val = parsed.path.split('/')[2]   #find the youtube 'v' id
+            pathlist = parsed.path.split('/')   #find the youtube 'v' id
+            for dirname in pathlist:
+                if dirname == 'v': pass
+                v_val = dirname
             path = "/embed/"+v_val
 
             path = path.split('&')[0]
