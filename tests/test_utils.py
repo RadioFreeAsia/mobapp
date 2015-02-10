@@ -299,8 +299,11 @@ class ReplaceEmbedsTests(unittest.TestCase):
         iframeElem = resultSoup.find('iframe')
         src = iframeElem.get('src')
 
+        parsed = urlparse.urlparse(src)
         self.assertEqual(src, '//www.youtube.com/embed/Pda1tQxWOIQ')
         
+        #self.assertEqual('', parsed.query)
+                
 def test_suite():
     return unittest.TestSuite( 
         (unittest.makeSuite(ReplaceEmbedsTests),
