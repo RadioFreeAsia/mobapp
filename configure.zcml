@@ -73,5 +73,21 @@
        allowed_attributes=""
    />
 
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="liveaudioinfo"
+       class=".browser.MobappLiveAudioView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+   
+   <browser:page
+       for="Products.rfasite.interfaces.ISubsite"
+       name="configinfo"
+       class=".browser.MobappConfigView"
+       permission="zope.Public"
+       allowed_attributes=""
+   />
+   
 
 </configure>

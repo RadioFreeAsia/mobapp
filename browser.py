@@ -4,11 +4,13 @@ import datetime
 import pytz
 
 from Acquisition import aq_inner
-
+from zope.component import getUtility
 from Products.Five.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
 
 from Products.rfasite.browser import SearchRetailView, RetailNavigationView, AudioArchiveView
+from Products.rfasite.livestreams import getLanguageChannels
+from Products.rfasite.interfaces import ILiveStreamUrlUtility
 
 import Types
 import utils
@@ -487,6 +489,139 @@ class MobappTopStoriesView(MobappBaseView):
 
         return self.info
 
+class MobappConfigView(MobappBaseView):
+    """ Controlls the configuration of the app: config.xml """
+    
+    def audioStreamInfo(self):
+        language = self.context.getLanguage()
+        channelInfo = getLanguageChannels(language)
+        streams = []
+        
+        for channel in channelInfo:
+            streams.append({"url":channel['url'],
+                           "title":channel['title'],
+                           "desc":channel["description"],
+                           "tubeId":channel["id"],
+                           })
+            
+        return streams
+            
+    
+    def videoStreamInfo(self):
+        return None
+        #return {"url":"Stream URL",
+        #        "title":"stream Title",
+        #        "desc":"stream Description",
+        #        "tubeId":"tubeId"
+        #        }
+     
+    
+    def feedbackEmail(self):
+        return "contact@rfa.org"
+    
+    def bugreportEmail(self):
+        return "contact@rfa.org"
+    
+    def socialMedias(self):
+        #return [ {"name":"Facebook","url":"facebook.com"},
+        #         {"name":"Twitter","url":"twitter.com"}
+        #       ]
+        
+        return None
+
+    def twitterHandle(self):
+        #return "@rfa"
+        return None
+    
+    def newsCastZoneId(self):
+        #return "250"
+        return None
+    
+    def bestPracticesUrl(self):
+        return "http://www.rfa.org/about/help/web_access.html"
+    
+    
+
+class MobappLiveAudioView(MobappBaseView):
+    """ Live Audio Streams"""
+    
+    def __init__(self, context, request):
+        super(MobappLiveAudioView, self).__init__(context, request)
+        self.streamtool = ILiveStreamUrlUtility(self.subsite)
+
+        self.tubeId = self.cirequest.get('tubeId', None)
+    
+    def title(self):
+        return "Scheduler"
+    
+    def program(self):
+        
+        streaminfo = self.streamtool.streamingInfo()
+        
+        if len(streaminfo) == 0:
+            return None
+        
+        #select the program that corresponds to tubeId:
+        for program in streaminfo:
+            if program["channel"]["id"] == self.tubeId:
+                break #this is the program we want to display
+        else:
+            return None #there is no stream to display
+                
+        program = streaminfo[0]
+        channel = program['channel']
+
+        #so you can datemath
+        start = datetime.datetime.combine(datetime.datetime.today(), program['start'])
+        end = datetime.datetime.combine(datetime.datetime.today(), program['end'])        
+        
+        #program/@duration Program duration (second)
+        
+        duration = (end - start).seconds
+        
+        #program/@url URL of the audio file(mp3 file). 
+        #This attribute is optional - if it is not specified it 
+        #means that prorgam is currently LIVE
+        
+        url = None  #we are always live... sort of.
+        
+        #Time when the broadcast program was recorded.
+        #XXX this should honor the 'rebroadcast' bool,
+        #but we have no info on what is actually being broacasted
+        #  Therefore, all is 'now, live'
+        date = datetime.datetime.now(pytz.utc)
+        
+        #program/@dateLocal Localized datetime of broadcasting, 
+        #with GMT offset included
+        #XXX Revisit when subsites have a timezone
+        # instead of UTC offset
+        offset = pytz.FixedOffset(self.subsite.getTimezoneOffset()*60)
+        dateLocal = datetime.datetime.now(offset)
+        
+        #program/@timeLeft Remaining time of program (second)
+        #This attribute is optional - if it is not specified it means
+        #that program is RECORDED or UNKNOWN LIVE PROGRAM ON AIR
+        timeLeft = (end - datetime.datetime.now(pytz.utc)).seconds
+        
+        programTitle = channel['title']
+        programDescription = channel['description'] #XXX get channel description        
+        url = channel['url']
+        info = {'id':'NoID',
+                'duration':duration,
+                'date':date,
+                'datelocal':dateLocal, 
+                'timeleft':timeLeft,
+                'title':programTitle,
+                'description':programDescription,
+                'url': url,
+                }
+
+        return info
+    
+    def streamActive(self):
+        """Returns a bool representing this stream is up or not"""
+        return self.streamtool.isStreaming()
+    
 
 def privateFolder(sectionBrain):
     exclude_from_nav = getattr(sectionBrain, 'exclude_from_nav', True)
