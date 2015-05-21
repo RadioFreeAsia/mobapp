@@ -450,10 +450,7 @@ class Video(Media):
         return self.obj.UID()
     
     def thumbnail(self):
-        width = '136'
-        vid_sec = '15'
         url = self.kalturaObj.getThumbnailUrl()
-        url = url + "/width/" + width + "/vid_sec/" + vid_sec        
         return url
 
 class _Article(Placeholder_Article):

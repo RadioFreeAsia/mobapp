@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<metal:page metal:use-macro="context/rss_main/macros/rss_master"
+            xmlns:metal="http://xml.zope.org/namespaces/metal"
+            xmlns:tal="http://xml.zope.org/namespaces/tal">
+            
+   <title metal:fill-slot="title">Service configuration feed</title>    
+  
+   <items metal:fill-slot="items" tal:omit-tag=""
+          tal:define="info context/@@configinfo;
+                     ">
+        <tal:AudioStreams tal:condition="info/audioStreamInfo"
+                          tal:define="streams info/audioStreamInfo">                    
+        <item tal:repeat="stream streams">
+            <liveStream tal:attributes="url stream/url;
+                                        title stream/title;
+                                        description stream/desc;
+                                        tubeId stream/tubeId;"     
+                        type="a" />
+        </item>
+        </tal:AudioStreams>
+        
+        <tal:VideoStreams tal:condition="info/videoStreamInfo"
+                          tal:define="streams info/videoStreamInfo">
+        <item tal:repeat="stream streams">
+            <liveStream tal:attributes="url stream/url;
+                                        title stream/title;
+                                        description stream/desc;
+                                        tubeId stream/tubeId;"
+                        type="v" />
+        </item>
+        </tal:VideoStreams>
+        <item tal:condition="info/feedbackEmail">
+            <feedbackEmail tal:attributes="email info/feedbackEmail"
+                           email="feedback@rferl.org" />
+        </item>
+        <item tal:condition="info/bugreportEmail" >
+            <bugReportEmail tal:attributes="email info/bugreportEmail"
+                            email="bugreport@rferl.org" />
+        </item>
+        <item tal:condition="info/socialMedias">
+            <socialMedias>
+                <mediaItem tal:repeat="media info/socialMedias"
+                           tal:attributes="title media/name;
+                                           url media/url">
+                
+                <tal:comment tal:replace="nothing">
+                <!-- example:
+                  <mediaItem title="Facebook" url="http://www.facebook.com/rfaenglish" />
+                  <mediaItem title="Twitter" url="http://www.twitter.com/rfaenglish" />
+                -->
+                </tal:comment>
+                </mediaItem>
+
+            </socialMedias>
+        </item>
+        <item tal:condition="info/twitterHandle">
+            <twitterHandle tal:attributes="Twitter info/twitterHandle"
+                           Twitter="@rfa" />
+        </item>
+        <item tal:condition="info/newsCastZoneId">
+            <newsCastZone tal:attributes="zoneId info/newsCastZoneId"
+                          zoneId="250" />
+        </item>
+        <item tal:condition="info/bestPracticesUrl">
+            <bestPractices tal:attributes="url info/bestPracticesUrl"
+                           url="" />
+        </item>
+
+    </items>
+    
+</metal:page>
+</rss>
