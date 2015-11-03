@@ -102,7 +102,8 @@ def replaceEmbedsWithIframes(soup):
             path = path.split('&')[0]
             newUrl = urlparse.urlunparse(('',parsed.netloc, path,
                                           '','',''))
-
+            divtag = Tag(soup, 'div', attrs=[(u'class' , u"videoWrapper"),]
+                                             )
             
             iframeTag = Tag(soup, 'iframe', attrs=[(u'src',newUrl),
                                                    (u'width',u"100%"),
@@ -110,8 +111,9 @@ def replaceEmbedsWithIframes(soup):
                                                    (u'class', u"YouTube"),
                                                    ]
                             )
+            divtag.insert(0, iframeTag)
 
-            oTag.replaceWith(iframeTag)
+            oTag.replaceWith(divtag)
 
     return soup
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<metal:page metal:use-macro="context/rss_main/macros/rss_master"
+   xmlns:metal="http://xml.zope.org/namespaces/metal"
+   xmlns:tal="http://xml.zope.org/namespaces/tal">
+   
+   <title metal:fill-slot="title">
+      <span tal:define="info context/@@liveaudioinfo;"
+            tal:content="info/title" tal:omit-tag="">
+        RFA Live Stream
+       </span>
+   </title>
+   
+   <items metal:fill-slot="items" tal:omit-tag=""
+          tal:define="info context/@@liveaudioinfo;"
+          tal:condition="info/program">
+        <item tal:define="program info/program">
+            <program tal:attributes="id program/id;
+                                     duration program/duration;
+                                     type string:b;
+                                     date program/date;
+                                     dateLocal program/datelocal;
+                                     timeLeft program/timeleft;"
+                   id="26993071" duration="3300" type="b" date="Wed, 22 Apr 2015 16:05:00 GMT" 
+                   dateLocal="Mon, 04 May 2015 23:05:00 +0300" timeLeft="2202">
+                <programTitle tal:content="program/title">Program Title</programTitle>
+                <programDescription tal:content="structure python:'&lt;![CDATA[' + program['description'] + ']]&gt;'">
+                  <![CDATA[
+                    description
+                  ]]>
+                </programDescription>
+                <span tal:content="structure string:&lt;!--" tal:omit-tag=""/>
+                <streamUrl tal:content="program/url">url</streamUrl>
+                <span tal:content="structure string:--&gt;" tal:omit-tag=""/>
+
+                
+            </program>
+        </item>
+    </items>
+
+</metal:page>
+</rss>
