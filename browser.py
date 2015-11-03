@@ -518,10 +518,10 @@ class MobappConfigView(MobappBaseView):
      
     
     def feedbackEmail(self):
-        return "contact@rfa.org"
+        return self.subsite.getProperty("app_feedbackEmail", "rfaapps@gmail.com")
     
     def bugreportEmail(self):
-        return "contact@rfa.org"
+        return self.subsite.getProperty("app_bugreportEmail", "rfaapps@gmail.com")
     
     def socialMedias(self):
         
