@@ -26,5 +26,10 @@ class mediaViewTests(unittest.TestCase):
         
         iter(gallery) #should be iterable
         
+class configViewTests(unittest.TestCase):
+    
+    def testAudioStreamInfo(self):
+        pass
+        
         
     

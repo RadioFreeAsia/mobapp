@@ -499,7 +499,8 @@ class MobappConfigView(MobappBaseView):
         
         for channel in channelInfo:
             streams.append({"url":channel['url'],
-                           "title":channel['title'],
+                           #"title":channel['title'],
+                           "title": "",  #TRAC ticket 604
                            "desc":channel["description"],
                            "tubeId":channel["id"],
                            })
@@ -523,16 +524,18 @@ class MobappConfigView(MobappBaseView):
         return "contact@rfa.org"
     
     def socialMedias(self):
-        #return [ {"name":"Facebook","url":"facebook.com"},
-        #         {"name":"Twitter","url":"twitter.com"}
-        #       ]
         
-        return None
+        info = [ {"name": "Facebook", "url": self.subsite.getProperty("app_facebook", None)},
+                 {"name": "Youtube", "url": self.subsite.getProperty("app_youtube", None)},
+                 {"name": "Twitter", "url": self.subsite.getProperty("app_twitter", None)},
+                 {"name": "SoundCloud", "url": self.subsite.getProperty("app_soundcloud", None)}
+                ]
+                
+        return info
 
     def twitterHandle(self):
-        #return "@rfa"
-        return None
-    
+        return self.subsite.getProperty("app_twitter_handle", None)
+        
     def newsCastZoneId(self):
         #return "250"
         return None
@@ -603,7 +606,8 @@ class MobappLiveAudioView(MobappBaseView):
         #that program is RECORDED or UNKNOWN LIVE PROGRAM ON AIR
         timeLeft = (end - datetime.datetime.now(pytz.utc)).seconds
         
-        programTitle = channel['title']
+        #programTitle = channel['title']
+        programTitle = "" #TRAC 604
         programDescription = channel['description'] #XXX get channel description        
         url = channel['url']
         info = {'id':'NoID',

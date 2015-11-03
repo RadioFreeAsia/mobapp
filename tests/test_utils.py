@@ -303,6 +303,33 @@ class ReplaceEmbedsTests(unittest.TestCase):
         self.assertEqual(src, '//www.youtube.com/embed/Pda1tQxWOIQ')
         
         #self.assertEqual('', parsed.query)
+        
+    def test_divTagWrapper(self):
+        inputString = """<p> <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" 
+                                     codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" 
+                                     height="315" width="560">
+                               <embed height="315" width="560" src="https://www.youtube.com/Pda1tQxWOIQ" 
+                                      allowscriptaccess="always" allowfullscreen="true" 
+                                      type="application/x-shockwave-flash"/>
+                             </object>
+                         </p>
+                      """
+        
+        inputSoup = BeautifulSoup(inputString)
+        
+        resultSoup = replaceEmbedsWithIframes(inputSoup)
+        
+        divElement = resultSoup.find('div', attrs={'class': 'videoWrapper'})
+        self.assertIsNotNone(divElement, 'Should contain a <div class="videoWrapper">')
+        
+        iframeElem = divElement.iframe
+        
+        self.assertIsNotNone(iframeElem, '<div class="videoWrapper"> should contain an iframe')
+        
+        src = iframeElem.get('src')
+        parsed = urlparse.urlparse(src)
+        self.assertEqual(src, '//www.youtube.com/embed/Pda1tQxWOIQ')
+        
                 
 def test_suite():
     return unittest.TestSuite( 
